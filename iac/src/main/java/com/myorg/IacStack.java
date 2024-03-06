@@ -8,6 +8,11 @@ import software.amazon.awscdk.services.apprunner.CfnService;
 import software.amazon.awscdk.services.docdb.DatabaseSecret;
 import software.amazon.awscdk.services.ec2.InstanceType;
 import software.amazon.awscdk.services.ec2.*;
+import software.amazon.awscdk.services.ecr.Repository;
+import software.amazon.awscdk.services.ecr.TagMutability;
+import software.amazon.awscdk.services.iam.ManagedPolicy;
+import software.amazon.awscdk.services.iam.Role;
+import software.amazon.awscdk.services.iam.ServicePrincipal;
 import software.amazon.awscdk.services.rds.*;
 import software.constructs.Construct;
 
@@ -47,6 +52,7 @@ public class IacStack extends Stack {
 
         SecurityGroup databaseSecurityGroup = SecurityGroup.Builder.create(this, "database-SG")
             .securityGroupName("database-SG")
+            .allowAllOutbound(false)
             .vpc(dbVpc)
             .build();
 
@@ -66,19 +72,45 @@ public class IacStack extends Stack {
             .removalPolicy(RemovalPolicy.DESTROY)
             .build();
 
-        // App Runner
+        //ECR
 
-        CfnService.CodeRepositoryProperty repositoryProperty = CfnService.CodeRepositoryProperty.builder()
-            .repositoryUrl("https://github.com/The-Bean-Index/TheBeanIndex")
-            .sourceDirectory("api")
+        Repository appRunnerRepository = Repository.Builder.create(this, "AppRunnerRepository")
+            .imageScanOnPush(true)
+            .imageTagMutability(TagMutability.MUTABLE)
+            .removalPolicy(RemovalPolicy.DESTROY)
+            .repositoryName("the-bean-index")
+            .build();
+
+        Role ecrAccessRole = Role.Builder.create(this, "AppRunnerECRRepositoryRole")
+            .assumedBy(new ServicePrincipal("build.apprunner.amazonaws.com"))
+            .managedPolicies(
+                List.of(
+                    ManagedPolicy.fromManagedPolicyArn(
+                        this,
+                        "AWSAppRunnerServicePolicyForECRAccessPolicy",
+                        "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess"
+                    )
+                )
+            )
+            .build();
+        CfnService.AuthenticationConfigurationProperty authenticationConfigurationProperty =
+            CfnService.AuthenticationConfigurationProperty.builder()
+                .accessRoleArn(ecrAccessRole.getRoleArn())
+                .build();
+
+        // App Runner
+        CfnService.ImageRepositoryProperty imageRepositoryProperty = CfnService.ImageRepositoryProperty.builder()
+            .imageIdentifier(appRunnerRepository.getRepositoryUri() + "/the-bean-index:latest")
+            .imageConfiguration(CfnService.ImageConfigurationProperty.builder()
+                .port("80")
+                .build())
+            .imageRepositoryType("ECR")
             .build();
 
         CfnService.SourceConfigurationProperty sourceConfigurationProperty = CfnService.SourceConfigurationProperty.builder()
-            .codeRepository(repositoryProperty)
-            .authenticationConfiguration(CfnService.AuthenticationConfigurationProperty.builder()
-                .connectionArn("")
-                .build())
-            .autoDeploymentsEnabled(false)
+            .imageRepository(imageRepositoryProperty)
+            .authenticationConfiguration(authenticationConfigurationProperty)
+            .autoDeploymentsEnabled(true)
             .build();
 
         CfnService.InstanceConfigurationProperty instanceConfigurationProperty = CfnService.InstanceConfigurationProperty.builder()
