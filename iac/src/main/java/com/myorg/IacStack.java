@@ -8,6 +8,8 @@ import software.amazon.awscdk.services.apprunner.CfnService;
 import software.amazon.awscdk.services.docdb.DatabaseSecret;
 import software.amazon.awscdk.services.ec2.InstanceType;
 import software.amazon.awscdk.services.ec2.*;
+import software.amazon.awscdk.services.ecr.Repository;
+import software.amazon.awscdk.services.ecr.TagMutability;
 import software.amazon.awscdk.services.iam.*;
 import software.amazon.awscdk.services.rds.*;
 import software.constructs.Construct;
