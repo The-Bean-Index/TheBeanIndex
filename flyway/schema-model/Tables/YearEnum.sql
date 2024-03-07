@@ -1,5 +1,5 @@
 CREATE TABLE [YearEnum] (
-  [id] int PRIMARY KEY,
+  [id] int IDENTITY(1,1) PRIMARY KEY,
   [year] int
 )
 GO
