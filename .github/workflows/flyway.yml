@@ -4,7 +4,7 @@ name: 'Flyway Github Actions'
 on:
   push:
     branches:
-      - Feature/Tawanda/TBI-8/Flyway
+      - main
       
 env:
   SQLFLUFF_DIALECT: postgres
