@@ -1,4 +1,4 @@
-package com.bbdgrad.thebeanindex;
+package com.bbdgrad.thebeanindex.repository;
 
 import com.bbdgrad.thebeanindex.model.*;
 import org.springframework.data.jpa.repository.JpaRepository;

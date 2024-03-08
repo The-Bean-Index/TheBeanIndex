@@ -1,4 +1,4 @@
-package com.bbdgrad.thebeanindex;
+package com.bbdgrad.thebeanindex.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
