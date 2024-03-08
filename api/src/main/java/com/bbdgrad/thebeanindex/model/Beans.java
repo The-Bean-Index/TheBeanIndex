@@ -7,7 +7,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-// @NoArgsConstructor
 @Entity
 @Table(name = "beans")
 public class Beans {

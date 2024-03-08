@@ -7,7 +7,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-// @NoArgsConstructor
 @Entity
 @Table(name = "countries")
 public class Countries {
