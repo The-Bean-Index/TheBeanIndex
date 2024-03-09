@@ -1,10 +1,6 @@
 package com.myorg;
 
-import software.amazon.awscdk.Duration;
-import software.amazon.awscdk.RemovalPolicy;
-import software.amazon.awscdk.Stack;
-import software.amazon.awscdk.StackProps;
-import software.amazon.awscdk.services.apprunner.CfnService;
+import software.amazon.awscdk.*;
 import software.amazon.awscdk.services.docdb.DatabaseSecret;
 import software.amazon.awscdk.services.ec2.InstanceType;
 import software.amazon.awscdk.services.ec2.*;
@@ -12,6 +8,7 @@ import software.amazon.awscdk.services.ecr.Repository;
 import software.amazon.awscdk.services.ecr.TagMutability;
 import software.amazon.awscdk.services.iam.*;
 import software.amazon.awscdk.services.rds.*;
+import software.amazon.awscdk.services.secretsmanager.Secret;
 import software.constructs.Construct;
 
 import java.util.List;
@@ -92,8 +89,14 @@ public class IacStack extends Stack {
             .resources(List.of("*"))
             .build();
 
+        PolicyStatement ecrGetAuthToken = PolicyStatement.Builder.create()
+            .actions(List.of("ecr:GetAuthorizationToken"))
+            .effect(Effect.ALLOW)
+            .resources(List.of("*"))
+            .build();
+
         PolicyDocument policyDocument = PolicyDocument.Builder.create()
-            .statements(List.of(assumeRoleStatement, getSecretsStatement))
+            .statements(List.of(assumeRoleStatement, getSecretsStatement, ecrGetAuthToken))
             .build();
 
         Role githubDeployRole = Role.Builder.create(this, "githubDeployRole")
@@ -103,56 +106,71 @@ public class IacStack extends Stack {
             .inlinePolicies(Map.of("deploymentPolicies", policyDocument))
             .maxSessionDuration(Duration.hours(1))
             .build();
-        //ECR
 
-        Repository appRunnerRepository = Repository.Builder.create(this, "AppRunnerRepository")
+        //ECR
+        Repository theBeanIndexRepository = Repository.Builder.create(this, "TheBeanIndexRepository")
             .imageScanOnPush(true)
             .imageTagMutability(TagMutability.MUTABLE)
             .removalPolicy(RemovalPolicy.DESTROY)
             .repositoryName("the-bean-index")
             .build();
 
-        Role ecrAccessRole = Role.Builder.create(this, "AppRunnerECRRepositoryRole")
-            .assumedBy(new ServicePrincipal("build.apprunner.amazonaws.com"))
+        // EC2
+
+        Role ec2InstanceRole = Role.Builder.create(this, "EC2InstanceRole")
+            .assumedBy(new ServicePrincipal("ec2.amazonaws.com"))
             .managedPolicies(
                 List.of(
                     ManagedPolicy.fromManagedPolicyArn(
                         this,
-                        "AWSAppRunnerServicePolicyForECRAccessPolicy",
-                        "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess"
+                        "AmazonEC2ContainerRegistryReadOnlyPolicy",
+                        "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
                     )
                 )
             )
-            .build();
-        CfnService.AuthenticationConfigurationProperty authenticationConfigurationProperty =
-            CfnService.AuthenticationConfigurationProperty.builder()
-                .accessRoleArn(ecrAccessRole.getRoleArn())
-                .build();
-
-        // App Runner
-        CfnService.ImageRepositoryProperty imageRepositoryProperty = CfnService.ImageRepositoryProperty.builder()
-            .imageIdentifier(appRunnerRepository.getRepositoryUri() + "/the-bean-index:latest")
-            .imageConfiguration(CfnService.ImageConfigurationProperty.builder()
-                .port("80")
-                .build())
-            .imageRepositoryType("ECR")
+            .inlinePolicies(Map.of("ecrPolicies", PolicyDocument.Builder.create()
+                .statements(List.of(ecrGetAuthToken))
+                .build()))
             .build();
 
-        CfnService.SourceConfigurationProperty sourceConfigurationProperty = CfnService.SourceConfigurationProperty.builder()
-            .imageRepository(imageRepositoryProperty)
-            .authenticationConfiguration(authenticationConfigurationProperty)
-            .autoDeploymentsEnabled(true)
+        Vpc ec2Vpc = Vpc.Builder.create(this, "ec2Vpc")
+            .ipAddresses(IpAddresses.cidr("192.0.0.0/16"))
+            .natGateways(1)
+            .maxAzs(2)
+            .subnetConfiguration(List.of(SubnetConfiguration.builder()
+                .name("ec2-public-subnet")
+                .subnetType(SubnetType.PUBLIC)
+                .cidrMask(24)
+                .build()))
             .build();
 
-        CfnService.InstanceConfigurationProperty instanceConfigurationProperty = CfnService.InstanceConfigurationProperty.builder()
-            .cpu("1 vCPU")
-            .memory("2 GB")
+        SecurityGroup ec2Sg = SecurityGroup.Builder.create(this, "ec2InstanceSg")
+            .vpc(ec2Vpc)
+            .allowAllOutbound(true)
+            .securityGroupName("EC2-Instance-Sg")
             .build();
 
-        CfnService.Builder.create(this, "the-bean-index-runner")
-            .serviceName("The-Bean-Index-Runner")
-            .sourceConfiguration(sourceConfigurationProperty)
-            .instanceConfiguration(instanceConfigurationProperty)
+        ec2Sg.addIngressRule(Peer.anyIpv4(), Port.tcp(22), "Allow SSH from the internet");
+        ec2Sg.addIngressRule(Peer.anyIpv4(), Port.tcp(80), "Allow HTTP access from the internet");
+
+        KeyPair keyPair = KeyPair.Builder.create(this, "instanceKeyPair")
+            .keyPairName("EC2-Instance-Key")
+            .type(KeyPairType.RSA)
+            .build();
+
+        Secret.Builder.create(this, "instanceKey")
+            .secretName("Instance-Key")
+            .secretObjectValue(Map.of("privateKey", SecretValue.unsafePlainText(keyPair.getPrivateKey().getStringValue())))
+            .build();
+
+        Instance ec2Instance = Instance.Builder.create(this, "javaServerInstance")
+            .vpc(ec2Vpc)
+            .role(ec2InstanceRole)
+            .securityGroup(ec2Sg)
+            .instanceName("Java-Server-Instance")
+            .instanceType(instanceType)
+            .machineImage(MachineImage.latestAmazonLinux2023())
+            .keyPair(keyPair)
             .build();
     }
 }
