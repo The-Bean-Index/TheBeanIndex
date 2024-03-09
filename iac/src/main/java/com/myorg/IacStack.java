@@ -97,8 +97,14 @@ public class IacStack extends Stack {
             .resources(List.of("*"))
             .build();
 
+        PolicyStatement describeInstances = PolicyStatement.Builder.create()
+            .actions(List.of("ec2:DescribeInstances"))
+            .effect(Effect.ALLOW)
+            .resources(List.of("*"))
+            .build();
+
         PolicyDocument policyDocument = PolicyDocument.Builder.create()
-            .statements(List.of(assumeRoleStatement, getSecretsStatement, ecrGetAuthToken))
+            .statements(List.of(assumeRoleStatement, getSecretsStatement, ecrGetAuthToken, describeInstances))
             .build();
 
         Role githubDeployRole = Role.Builder.create(this, "githubDeployRole")
