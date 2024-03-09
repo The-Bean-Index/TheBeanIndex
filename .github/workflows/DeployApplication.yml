@@ -33,9 +33,11 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '21'
+        
+        # Inject DB info to env and run tests here
 
       - name: Build Image
-        run: "mvn spring-boot:build-image"
+        run: mvn spring-boot:build-image -Dmaven.test.skip
 
       - name: Set VERSION environment variable
         run: |
