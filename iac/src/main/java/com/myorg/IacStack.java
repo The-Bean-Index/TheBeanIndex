@@ -1,6 +1,9 @@
 package com.myorg;
 
-import software.amazon.awscdk.*;
+import software.amazon.awscdk.Duration;
+import software.amazon.awscdk.RemovalPolicy;
+import software.amazon.awscdk.Stack;
+import software.amazon.awscdk.StackProps;
 import software.amazon.awscdk.services.docdb.DatabaseSecret;
 import software.amazon.awscdk.services.ec2.InstanceType;
 import software.amazon.awscdk.services.ec2.*;
@@ -8,7 +11,6 @@ import software.amazon.awscdk.services.ecr.Repository;
 import software.amazon.awscdk.services.ecr.TagMutability;
 import software.amazon.awscdk.services.iam.*;
 import software.amazon.awscdk.services.rds.*;
-import software.amazon.awscdk.services.secretsmanager.Secret;
 import software.constructs.Construct;
 
 import java.util.List;
@@ -155,13 +157,17 @@ public class IacStack extends Stack {
 
         KeyPair keyPair = KeyPair.Builder.create(this, "instanceKeyPair")
             .keyPairName("EC2-Instance-Key")
+            .physicalName("EC2-Instance-Key")
             .type(KeyPairType.RSA)
             .build();
 
-        Secret.Builder.create(this, "instanceKey")
-            .secretName("Instance-Key")
-            .secretObjectValue(Map.of("privateKey", SecretValue.unsafePlainText(keyPair.getPrivateKey().getStringValue())))
-            .build();
+        UserData userData = UserData.forLinux();
+        userData.addCommands(
+            "sudo yum update -y",
+            "sudo yum install docker -y",
+            "sudo service docker start",
+            "sudo usermod -a -G docker ec2-user"
+        );
 
         Instance ec2Instance = Instance.Builder.create(this, "javaServerInstance")
             .vpc(ec2Vpc)
@@ -171,6 +177,7 @@ public class IacStack extends Stack {
             .instanceType(instanceType)
             .machineImage(MachineImage.latestAmazonLinux2023())
             .keyPair(keyPair)
+            .userData(userData)
             .build();
     }
 }
