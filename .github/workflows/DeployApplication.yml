@@ -51,9 +51,21 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.ECR_REPO_NAME }}
+          ECR_REPOSITORY: the-bean-index
           IMAGE_TAG: latest
           APP_NAME: the-bean-index
         run: |
           docker tag $APP_NAME:$VERSION $ECR_REPOSITORY/$APP_NAME:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Get EC2 Instance IP and Key Pair ID
+        run: |
+          echo "EC2_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)" >> $GITHUB_ENV
+          echo "KEY_PAIR_ID=$(aws ec2 describe-key-pairs --query 'KeyPairs[*].KeyPairId' --output text)" >> $GITHUB_ENV
+          echo "::add-mask::$KEY_PAIR_ID"
+
+      - name: Get Private Key from SSM
+        uses: Produce8/actions-aws-ssm-params-to-env@v1.1.0
+        with:
+          ssm-path: ec2/keypair/${{ env.KEY_PAIR_ID }}
+          decryption: true
