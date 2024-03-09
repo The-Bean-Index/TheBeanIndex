@@ -8,6 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "YearEnum")
 public class YearEnum {
     
