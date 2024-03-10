@@ -1,5 +1,7 @@
 package com.bbdgrad.thebeanindex.model;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +11,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @NoArgsConstructor
-@Table(name = "YearEnum")
+@Table(name = "Yearenum")
 public class YearEnum {
     
     @Id
@@ -18,8 +20,12 @@ public class YearEnum {
 
     private Integer year;
 
-    public YearEnum(Integer id, Integer year) {
+    @OneToMany(mappedBy = "yearId")
+    List<GDP> gdps;
+
+    public YearEnum(Integer id, Integer year, List<GDP> gdps) {
         this.id = id;
         this.year = year;
+        this.gdps = gdps;
     }
 }
