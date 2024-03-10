@@ -86,7 +86,7 @@ public class IacStack extends Stack {
             .build();
 
         PolicyStatement getSecretsStatement = PolicyStatement.Builder.create()
-            .actions(List.of("secretsmanager:GetSecretValue"))
+            .actions(List.of("secretsmanager:GetSecretValue", "secretsmanager:ListSecrets"))
             .effect(Effect.ALLOW)
             .resources(List.of("*"))
             .build();
