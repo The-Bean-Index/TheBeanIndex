@@ -42,7 +42,7 @@ jobs:
 
       - name: Map environment variables
         run: |
-          echo "DB_DATABASE=$DB_HOST" >> $GITHUB_ENV
+          echo "DB_DATABASE=jdbc:sqlserver://$DB_HOST:$DB_PORT;authentication=sqlPassword;databaseName=thebeanindex;encrypt=true;trustServerCertificate=true" >> $GITHUB_ENV
           echo "DB_USER=$DB_USERNAME" >> $GITHUB_ENV
 
       - name: Run Tests
