@@ -64,7 +64,7 @@ jobs:
         run: |
           echo "EC2_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)" >> $GITHUB_ENV
           echo "KEY_PAIR_ID=$(aws ec2 describe-key-pairs --query 'KeyPairs[*].KeyPairId' --output text)" >> $GITHUB_ENV
-          echo "::add-mask::$KEY_PAIR_ID"
+
 
       - name: Get Private Key from SSM
         uses: Produce8/actions-aws-ssm-params-to-env@v1.1.0
@@ -72,9 +72,11 @@ jobs:
           ssm-path: ec2/keypair/${{ env.KEY_PAIR_ID }}
           prefix: SSM_
           decryption: true
+
+      - name: Mask and add key
         run: |
-          echo "::add-mask::SSM_$KEY_PAIR_ID"
-          echo "PRIVATE_KEY=SSM_$KEY_PAIR_ID" >> $GITHUB_ENV
+          echo "::add-mask::$(printenv 'SSM_'$KEY_PAIR_ID)"
+          echo "PRIVATE_KEY=$(printenv 'SSM_'$KEY_PAIR_ID)" >> $GITHUB_ENV
 
       - name: Run container on EC2
         uses: appleboy/ssh-action@1.0.3
