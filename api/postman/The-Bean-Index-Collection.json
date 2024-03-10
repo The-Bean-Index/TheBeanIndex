@@ -26,7 +26,7 @@
 									"    pm.response.json().forEach((country) => {\r",
 									"        pm.expect(country).to.be.a('string');\r",
 									"    });\r",
-									"});"
+									"});;"
 								],
 								"type": "text/javascript"
 							}
@@ -45,6 +45,93 @@
 							"path": [
 								"countries",
 								"names"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Year",
+			"item": [
+				{
+					"name": "Get countries by year that exists",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is ok\", function () {\r",
+									"    pm.expect(pm.response.code).to.equal(202);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body has list of dgps\", function () {\r",
+									"    const responseJSON = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJSON).to.be.an('object');\r",
+									"    pm.expect(responseJSON.gdps).to.be.an('array').and.to.have.lengthOf.at.least(1, \"GDP list should not be empty\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/year/2022",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"year",
+								"2022"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get countries by year that doesn't exist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"response is ok\", function () {\r",
+									"    pm.expect(pm.response.code).to.equal(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response body has null values\", function() {\r",
+									"    const responseJSON = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJSON).to.be.an('object');\r",
+									"    Object.values(responseJSON).forEach((value) => {\r",
+									"        pm.expect(value).to.be.a(\"null\");\r",
+									"    });\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/year/202",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"year",
+								"202"
 							]
 						}
 					},

@@ -2,7 +2,14 @@ package com.bbdgrad.thebeanindex.model;
 
 import java.math.BigDecimal;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,10 +23,12 @@ public class GDP {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(insertable=false, updatable=false)
     private Integer id;
 
-    @Column(name = "country_id")
-    private Integer countryId;
+    @ManyToOne()
+    @JoinColumn(name = "Id")
+    private Countries country;
 
     @Column(name = "year_id")
     private Integer yearId;
@@ -27,9 +36,9 @@ public class GDP {
     @Column(name = "gdp_amount", precision = 10, scale = 2)
     private BigDecimal gdpAmount;
 
-    public GDP(Integer id, Integer countryId, Integer yearId, BigDecimal gdpAmount) {
+    public GDP(Integer id, Countries country, Integer yearId, BigDecimal gdpAmount) {
         this.id = id;
-        this.countryId = countryId;
+        this.country = country;
         this.yearId = yearId;
         this.gdpAmount = gdpAmount;
     }
