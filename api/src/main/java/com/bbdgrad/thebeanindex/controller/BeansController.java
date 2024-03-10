@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import com.bbdgrad.thebeanindex.repository.BeansRepository;
 import com.bbdgrad.thebeanindex.Dtos.BeansDto;
@@ -30,11 +32,12 @@ public class BeansController {
     }
 
     @GetMapping("/names")
-    public List<String> getAllBeanPrices() {
-        List<String> beanPrices = beansRepository.findAll().stream()
+    public ResponseEntity<List<String>> getAllBeanPrices() {
+        List<String> beanNames = beansRepository.findAll().stream()
                 .map(Beans::getName)
-                .map(Object::toString)
+                .map(Object::toString)  
                 .collect(Collectors.toList());
-        return beanPrices;
+        
+        return new ResponseEntity<>(beanNames, HttpStatus.OK);
     }
 }
