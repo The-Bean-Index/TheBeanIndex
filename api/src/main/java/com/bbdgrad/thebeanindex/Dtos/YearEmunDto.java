@@ -15,7 +15,7 @@ public class YearEmunDto {
 
     private Integer year;
 
-    List<GDPDto> gdps;
+    private List<GDPDto> gdps;
 
     public static YearEmunDto toDto(YearEnum year) {
         YearEmunDto dto = new YearEmunDto();
