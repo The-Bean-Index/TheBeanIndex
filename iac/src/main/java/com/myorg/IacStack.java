@@ -97,20 +97,38 @@ public class IacStack extends Stack {
             .resources(List.of("*"))
             .build();
 
-        PolicyStatement describeInstances = PolicyStatement.Builder.create()
-            .actions(List.of("ec2:DescribeInstances"))
+        PolicyStatement ec2instancesAndPairs = PolicyStatement.Builder.create()
+            .actions(List.of("ec2:DescribeInstances", "ec2:DescribeKeyPairs"))
             .effect(Effect.ALLOW)
             .resources(List.of("*"))
             .build();
 
         PolicyStatement getSSMParam = PolicyStatement.Builder.create()
-            .actions(List.of("ssm:GetParameter"))
+            .actions(List.of("ssm:GetParameter", "ssm:GetParameters"))
             .effect(Effect.ALLOW)
-            .resources(List.of("arm:aws:ssm:::parameter/ec2/keypair/*"))
+            .resources(List.of("*"))
+            .build();
+
+        PolicyStatement decryptKMS = PolicyStatement.Builder.create()
+            .actions(List.of("kms:Decrypt"))
+            .effect(Effect.ALLOW)
+            .resources(List.of("arn:aws:kms:*:*:key/alias/aws/ssm"))
+            .build();
+
+        PolicyStatement ecrPush = PolicyStatement.Builder.create()
+            .actions(List.of(
+                "ecr:CompleteLayerUpload",
+                "ecr:GetAuthorizationToken",
+                "ecr:UploadLayerPart",
+                "ecr:InitiateLayerUpload",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:PutImage"))
+            .effect(Effect.ALLOW)
+            .resources(List.of("*"))
             .build();
 
         PolicyDocument policyDocument = PolicyDocument.Builder.create()
-            .statements(List.of(assumeRoleStatement, getSecretsStatement, ecrGetAuthToken, describeInstances, getSSMParam))
+            .statements(List.of(assumeRoleStatement, getSecretsStatement, ecrPush, ec2instancesAndPairs, getSSMParam, decryptKMS))
             .build();
 
         Role githubDeployRole = Role.Builder.create(this, "githubDeployRole")
