@@ -116,4 +116,4 @@ jobs:
             docker pull $IMAGE_INFO
             docker stop backend
             docker rm backend
-            docker run --detach --name backend -p 80:8080 -e DB_DATABASE=$DB_DATABASE  -e DB_USER=$DB_USER  -e DB_PASSWORD=$DB_PASSWORD  $IMAGE_INFO
+            docker run --name backend -p 80:8080 -e DB_DATABASE=$DB_DATABASE  -e DB_USER=$DB_USER  -e DB_PASSWORD=$DB_PASSWORD -m=750M -d $IMAGE_INFO
