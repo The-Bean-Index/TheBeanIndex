@@ -103,8 +103,14 @@ public class IacStack extends Stack {
             .resources(List.of("*"))
             .build();
 
+        PolicyStatement getSSMParam = PolicyStatement.Builder.create()
+            .actions(List.of("ssm:GetParameter"))
+            .effect(Effect.ALLOW)
+            .resources(List.of("arm:aws:ssm:::parameter/ec2/keypair/*"))
+            .build();
+
         PolicyDocument policyDocument = PolicyDocument.Builder.create()
-            .statements(List.of(assumeRoleStatement, getSecretsStatement, ecrGetAuthToken, describeInstances))
+            .statements(List.of(assumeRoleStatement, getSecretsStatement, ecrGetAuthToken, describeInstances, getSSMParam))
             .build();
 
         Role githubDeployRole = Role.Builder.create(this, "githubDeployRole")
