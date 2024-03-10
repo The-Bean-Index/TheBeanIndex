@@ -76,12 +76,11 @@ jobs:
           IMAGE_TAG: latest
           APP_NAME: the-bean-index
         run: |
-          docker images
-          docker tag $APP_NAME:$VERSION $ECR_REPOSITORY/$APP_NAME:$IMAGE_TAG
-          docker images
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "IMAGE_INFO=$ECR_REPOSITORY':'$IMAGE_TAG" >> $GITHUB_ENV
-          echo "ECR_REGISTRY=$ECR_REGISTRY" >> GITHUB_ENV
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+          docker tag $APP_NAME:$VERSION $ECR_REGISTRY'/'$ECR_REPOSITORY':'$IMAGE_TAG
+          docker push $ECR_REGISTRY'/'$ECR_REPOSITORY':'$IMAGE_TAG
+          echo "IMAGE_INFO=$ECR_REGISTRY'/'$ECR_REPOSITORY':'$IMAGE_TAG" >> $GITHUB_ENV
+          echo "ECR_REGISTRY=$ECR_REGISTRY" >> $GITHUB_ENV
 
       - name: Get EC2 Instance IP and Key Pair ID
         run: |
@@ -107,10 +106,10 @@ jobs:
           host: ${{ env.EC2_IP }}
           username: ec2-user
           key: ${{ env.PRIVATE_KEY }}
-          envs: IMAGE_INFO, ECR_REGISTRY, AWS_REGION, DB_USER, DB_DATABASE, DB_PASSWORD
+          envs: IMAGE_INFO, ECR_REGISTRY, ECR_REPOSITORY AWS_REGION, DB_USER, DB_DATABASE, DB_PASSWORD
           script: |
             aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-            docker pull $ECR_REGISTRY/$IMAGE_INFO
+            docker pull $IMAGE_INFO
             docker stop backend_server
             docker rm backend
             docker run --detach --name backend -p 80:8080 -e DB_DATABASE=$DB_DATABASE  -e DB_USER=$DB_USER  -e DB_PASSWORD=$DB_PASSWORD  $IMAGE_INFO
