@@ -49,7 +49,7 @@ jobs:
         run: |
           echo "DB_DATABASE=jdbc:sqlserver://$DB_HOST:$DB_PORT;authentication=sqlPassword;databaseName=thebeanindex;encrypt=true;trustServerCertificate=true" >> $GITHUB_ENV
           echo "DB_USER=$DB_USERNAME" >> $GITHUB_ENV
-      
+
       #      - name: Run Tests
       #        run: mvn test
 
@@ -79,7 +79,7 @@ jobs:
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
           docker tag $APP_NAME:$VERSION $ECR_REGISTRY'/'$ECR_REPOSITORY':'$IMAGE_TAG
           docker push $ECR_REGISTRY'/'$ECR_REPOSITORY':'$IMAGE_TAG
-          echo "IMAGE_INFO=$ECR_REGISTRY'/'$ECR_REPOSITORY':'$IMAGE_TAG" >> $GITHUB_ENV
+          echo "IMAGE_INFO=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
           echo "ECR_REGISTRY=$ECR_REGISTRY" >> $GITHUB_ENV
 
       - name: Get EC2 Instance IP and Key Pair ID
@@ -89,16 +89,20 @@ jobs:
 
 
       - name: Get Private Key from SSM
-        uses: Produce8/actions-aws-ssm-params-to-env@1.1.0
+        uses: Bardavon-Health/actions-aws-ssm-params-to-env@v1.3.2
         with:
-          ssm-path: ec2/keypair/${{ env.KEY_PAIR_ID }}
+          ssm-path: /ec2/keypair/${{ env.KEY_PAIR_ID }}
           prefix: SSM_
           decryption: true
+          mask-values: true
 
       - name: Mask and add key
         run: |
-          echo "::add-mask::$(printenv 'SSM_'$KEY_PAIR_ID)"
-          echo "PRIVATE_KEY=$(printenv 'SSM_'$KEY_PAIR_ID)" >> $GITHUB_ENV
+          {
+            echo 'PRIVATE_KEY<<EOFDELIMITER'
+            printenv 'SSM_'$KEY_PAIR_ID
+            echo EOFDELIMITER
+          } >> $GITHUB_ENV
 
       - name: Run container on EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -106,10 +110,10 @@ jobs:
           host: ${{ env.EC2_IP }}
           username: ec2-user
           key: ${{ env.PRIVATE_KEY }}
-          envs: IMAGE_INFO, ECR_REGISTRY, ECR_REPOSITORY AWS_REGION, DB_USER, DB_DATABASE, DB_PASSWORD
+          envs: IMAGE_INFO, ECR_REGISTRY, ECR_REPOSITORY, AWS_REGION, DB_USER, DB_DATABASE, DB_PASSWORD
           script: |
             aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
             docker pull $IMAGE_INFO
-            docker stop backend_server
+            docker stop backend
             docker rm backend
             docker run --detach --name backend -p 80:8080 -e DB_DATABASE=$DB_DATABASE  -e DB_USER=$DB_USER  -e DB_PASSWORD=$DB_PASSWORD  $IMAGE_INFO
