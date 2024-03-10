@@ -33,8 +33,20 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '21'
-        
-        # Inject DB info to env and run tests here
+
+      - name: Get secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2.0.1
+        with:
+          secret-ids: DB, dbSuperUser*
+          parse-json-secrets: true
+
+      - name: Map environment variables
+        run: |
+          echo "DB_DATABASE=$DB_HOST" >> $GITHUB_ENV
+          echo "DB_USER=$DB_USERNAME" >> $GITHUB_ENV
+
+      - name: Run Tests
+        run: mvn test
 
       - name: Build Image
         run: mvn spring-boot:build-image -Dmaven.test.skip
@@ -67,7 +79,7 @@ jobs:
 
 
       - name: Get Private Key from SSM
-        uses: Produce8/actions-aws-ssm-params-to-env@v1.1.0
+        uses: Produce8/actions-aws-ssm-params-to-env@1.1.0
         with:
           ssm-path: ec2/keypair/${{ env.KEY_PAIR_ID }}
           prefix: SSM_
@@ -79,15 +91,15 @@ jobs:
           echo "PRIVATE_KEY=$(printenv 'SSM_'$KEY_PAIR_ID)" >> $GITHUB_ENV
 
       - name: Run container on EC2
-        uses: appleboy/ssh-action@1.0.3
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ env.EC2_IP }}
           username: ec2-user
           key: ${{ env.PRIVATE_KEY }}
-          envs: IMAGE_INFO, ECR_REGISTRY, AWS_REGION
+          envs: IMAGE_INFO, ECR_REGISTRY, AWS_REGION, DB_USER, DB_DATABASE, DB_PASSWORD
           script: |
             aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
             docker pull $ECR_REGISTRY/$IMAGE_INFO
             docker stop backend_server
             docker rm backend
-            docker run --detach --name backend -p 80:8080 $IMAGE_INFO
+            docker run --detach --name backend -p 80:8080 -e DB_DATABASE=$DB_DATABASE  -e DB_USER=$DB_USER  -e DB_PASSWORD=$DB_PASSWORD  $IMAGE_INFO
