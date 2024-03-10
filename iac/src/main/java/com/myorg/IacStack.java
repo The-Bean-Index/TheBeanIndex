@@ -169,10 +169,10 @@ public class IacStack extends Stack {
 
         UserData userData = UserData.forLinux();
         userData.addCommands(
-            "sudo yum update -y",
-            "sudo yum install docker -y",
-            "sudo service docker start",
-            "sudo usermod -a -G docker ec2-user"
+            "yum update -y",
+            "yum install docker -y",
+            "service docker start",
+            "usermod -a -G docker ec2-user"
         );
 
         Instance ec2Instance = Instance.Builder.create(this, "javaServerInstance")
