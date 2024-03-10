@@ -1,5 +1,7 @@
 package com.bbdgrad.thebeanindex.model;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,8 +21,12 @@ public class Beans {
     @Column(name = "name", nullable = false)
     private String name;
 
-    public Beans(Integer id, String name) {
+    @Column(name = "beanprice", precision = 10, scale = 2)
+    private BigDecimal beanPrice;
+
+    public Beans(Integer id, String name, BigDecimal beanPrice) {
         this.id = id;
         this.name = name;
+        this.beanPrice = beanPrice;
     }
 }
