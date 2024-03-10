@@ -1,0 +1,40 @@
+1710062265978:help
+1710062290125:help hello
+1710062307377:csfs
+1710062309976:hello
+1710063486474:list-countries
+1710063506312:list countries
+1710063735207:ranked gdp
+1710063781468:ranked gdp 2022
+1710063801985:ranked gdp 2023
+1710064082126:list countries
+1710064436483:ranked gdp
+1710064455784:ranked gdp 2021
+1710064556937:list countries
+1710064562881:ranked gdp 2021
+1710064639440:ranked gdp --year=2021
+1710064682952:ranked gdp 2021
+1710064734294:list countries
+1710064735923:ranked gdp 2021
+1710064755040:list countries
+1710064757512:ranked gdp 2021
+1710064817780:list countries
+1710065529661:list beans
+1710066028438:country gdp "Country A"
+1710066093302:country gdp --country "Country A"
+1710066101572:country gdp --country "Country B"
+1710066767303:gdp for year -c CountryA -y 2024
+1710066777138:gdp for year -c Country A -y 2024
+1710066859202:shell:>gdp for year -c "Country A" -y 2024
+1710066868186:gdp for year -c "Country A" -y 2024
+1710067684742:ranked gdp
+1710099539856:gdp for year --country "Country A" --year 2021 --bean coffee
+1710099675155:gdp for year --country "Country A" --year 2021 --bean cocoa
+1710100359679:compare gdp --country1 "Country A" --country2 "Country B" --bean coffee
+1710100830963:gdp for year --country "Country A" --year 2021 --bean cocoa
+1710100915961:gdp for year --country "Country A" --year 2021 --bean coffee
+1710100930122:gdp for year --country "Country A" --year 2021 --bean cocoa
+1710101045806:gdp for year --country "Country A" --year 2021 --bean coffee
+1710101102847:ranked gdp
+1710101653720:compare gdp --country1 "Country A" --country2 "Country B" --bean coffee
+1710101754676:compare gdp --country1 "Country A" --country2 "Country A" --bean coffee
