@@ -19,8 +19,8 @@ import lombok.Setter;
 @Entity
 @NoArgsConstructor
 @Table(name = "GDP")
-public class GDP {
-    
+public class GDPwithYear {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(insertable=false, updatable=false)
@@ -30,16 +30,17 @@ public class GDP {
     @JoinColumn(name = "country_id")
     private Countries country;
 
-    @Column(name = "year_id")
-    private Integer yearId;
+    @ManyToOne()
+    @JoinColumn(name = "year_id")
+    private Year year;
 
     @Column(name = "gdp_amount", precision = 10, scale = 2)
     private BigDecimal gdpAmount;
 
-    public GDP(Integer id, Countries country, Integer yearId, BigDecimal gdpAmount) {
+    public GDPwithYear(Integer id, Countries country, Year year, BigDecimal gdpAmount) {
         this.id = id;
         this.country = country;
-        this.yearId = yearId;
+        this.year = year;
         this.gdpAmount = gdpAmount;
     }
 }
