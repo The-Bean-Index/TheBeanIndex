@@ -2,6 +2,9 @@ package com.bbdgrad.thebeanindex.model;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,19 +30,22 @@ public class GDP {
     private Integer id;
 
     @ManyToOne()
-    @JoinColumn(name = "Id")
+    @JoinColumn(name = "country_id")
     private Countries country;
 
-    @Column(name = "year_id")
-    private Integer yearId;
+    
+    @JsonIgnoreProperties("gdps")
+    @ManyToOne()
+    @JoinColumn(name = "year_id")
+    private YearEnum year;
 
     @Column(name = "gdp_amount", precision = 10, scale = 2)
     private BigDecimal gdpAmount;
 
-    public GDP(Integer id, Countries country, Integer yearId, BigDecimal gdpAmount) {
+    public GDP(Integer id, Countries country, YearEnum year, BigDecimal gdpAmount) {
         this.id = id;
         this.country = country;
-        this.yearId = yearId;
+        this.year = year;
         this.gdpAmount = gdpAmount;
     }
 }

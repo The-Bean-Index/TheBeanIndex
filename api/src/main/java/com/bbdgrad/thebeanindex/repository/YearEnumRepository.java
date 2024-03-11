@@ -9,4 +9,6 @@ import com.bbdgrad.thebeanindex.model.YearEnum;
 public interface YearEnumRepository extends JpaRepository<YearEnum, Integer>{
     
     Optional<YearEnum> findAllReferencesByYear(int year);
+
+    Optional<YearEnum> findReferenceByYear(int year);
 }
