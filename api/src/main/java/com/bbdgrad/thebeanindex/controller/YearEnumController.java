@@ -40,7 +40,7 @@ public class YearEnumController {
     }
 
     @GetMapping("country/{country}")
-    public ResponseEntity<?> getCountryGdpForLast5Years(@PathVariable String country) {
+    public ResponseEntity<YearsEnumDto> getCountryGdpForLast5Years(@PathVariable String country) {
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat("yyyy");
 
