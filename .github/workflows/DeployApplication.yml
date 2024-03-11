@@ -50,8 +50,8 @@ jobs:
           echo "DB_DATABASE=jdbc:sqlserver://$DB_HOST:$DB_PORT;authentication=sqlPassword;databaseName=thebeanindex;encrypt=true;trustServerCertificate=true" >> $GITHUB_ENV
           echo "DB_USER=$DB_USERNAME" >> $GITHUB_ENV
 
-      #      - name: Run Tests
-      #        run: mvn test
+      - name: Run Tests
+        run: mvn test
 
       - name: Build Image
         run: mvn spring-boot:build-image -Dmaven.test.skip
@@ -87,7 +87,6 @@ jobs:
           echo "EC2_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)" >> $GITHUB_ENV
           echo "KEY_PAIR_ID=$(aws ec2 describe-key-pairs --query 'KeyPairs[*].KeyPairId' --output text)" >> $GITHUB_ENV
 
-
       - name: Get Private Key from SSM
         uses: Bardavon-Health/actions-aws-ssm-params-to-env@v1.3.2
         with:
@@ -96,7 +95,7 @@ jobs:
           decryption: true
           mask-values: true
 
-      - name: Mask and add key
+      - name: Map private key
         run: |
           {
             echo 'PRIVATE_KEY<<EOFDELIMITER'
