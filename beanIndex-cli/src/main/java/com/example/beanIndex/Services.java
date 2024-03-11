@@ -1,24 +1,34 @@
 package com.example.beanIndex;
 
 import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 
 @Service
 public class Services {
     private static final double COFFEE_BEAN_VALUE = 10.0;
     private static final double COCOA_BEAN_VALUE = 8.0;
+   
+    private final ApiClient apiClient;
 
-    public List<String> getCountries() {
-        List<String> countries = new ArrayList<>();
-        countries.add("Country A");
-        countries.add("Country B");
-        countries.add("Country C");
-        return countries;
+    @Autowired
+    public Services(ApiClient apiClient) {
+        this.apiClient = apiClient;
     }
+
+  
+
+     public List<String> getCountries() {
+        return apiClient.getCountryNames();
+    }
+
+   
      public List<String> getBeans() {
         List<String> countries = new ArrayList<>();
         countries.add("Bean A");
