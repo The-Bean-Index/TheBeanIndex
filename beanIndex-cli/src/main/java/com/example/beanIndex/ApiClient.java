@@ -44,4 +44,26 @@ public class ApiClient {
 
         return new ArrayList<>();
     }
+    
+    public List<String> getBeanNames() {
+        String beansUrl = baseUrl + "/beans/names";
+
+        try {
+            ResponseEntity<Map<String, Object>> responseEntity = restTemplate.exchange(
+                    beansUrl,
+                    org.springframework.http.HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {});
+
+            if (responseEntity.getBody() != null) {
+                Map<String, Object> responseBody = responseEntity.getBody();
+                List<String> beanNames = (List<String>) responseBody.get("beanNames");
+                return beanNames != null ? beanNames : new ArrayList<>();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
+    }
 }

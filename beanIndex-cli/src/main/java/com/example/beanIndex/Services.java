@@ -22,19 +22,13 @@ public class Services {
         this.apiClient = apiClient;
     }
 
-  
-
-     public List<String> getCountries() {
+    public List<String> getCountries() {
         return apiClient.getCountryNames();
     }
 
    
-     public List<String> getBeans() {
-        List<String> countries = new ArrayList<>();
-        countries.add("Bean A");
-        countries.add("Bean B");
-        countries.add("Bean C");
-        return countries;
+    public List<String> getBeans() {
+        return apiClient.getBeanNames();
     }
 
     public Double getGDPForCountryAndYear(String country, int year, String beanType) {
