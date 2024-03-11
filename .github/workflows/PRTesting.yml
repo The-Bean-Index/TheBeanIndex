@@ -1,0 +1,90 @@
+name: Run Integration and Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - edited
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run-integration-tests:
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./api
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4.1.1
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.1
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Install Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Restore Maven cache
+        uses: skjolber/maven-cache-github-action@v1
+        with:
+          step: restore
+
+      - name: Get secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2.0.1
+        with:
+          secret-ids: DB, dbSuperUser*
+          parse-json-secrets: true
+
+      - name: Map environment variables
+        run: |
+          echo "DB_DATABASE=jdbc:sqlserver://$DB_HOST:$DB_PORT;authentication=sqlPassword;databaseName=thebeanindex;encrypt=true;trustServerCertificate=true" >> $GITHUB_ENV
+          echo "DB_USER=$DB_USERNAME" >> $GITHUB_ENV
+
+      - name: Run Tests
+        run: mvn test
+
+      - name: Build Image
+        run: mvn spring-boot:build-image -Dmaven.test.skip
+
+      - name: Save Maven cache
+        uses: skjolber/maven-cache-github-action@v1
+        with:
+          step: save
+
+      - name: Set VERSION environment variable
+        run: |
+          echo "VERSION=$(mvn help:evaluate -Dexpression='project.version' -q -DforceStdout)" >> $GITHUB_ENV
+
+      - name: Run Docker Container
+        run: |
+          docker run --name backend -p 8080:8080 -e DB_DATABASE=$DB_DATABASE  -e DB_USER=$DB_USER  -e DB_PASSWORD=$DB_PASSWORD -m=750M -d the-bean-index:$VERSION
+
+      - name: Install Postman CLI
+        run: curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+
+      - name: Login to Postman CLI
+        run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
+
+      - name: Run integration tests
+        run: postman collection run "29385230-7b98d6e8-d977-4f0e-87fb-b0f8a52ae506"
+
+      - name: Stop Docker Container
+        run: |
+          docker stop backend
+          docker rm backend
