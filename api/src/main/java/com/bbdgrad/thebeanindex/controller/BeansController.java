@@ -10,12 +10,11 @@ import org.springframework.http.ResponseEntity;
 
 import com.bbdgrad.thebeanindex.repository.BeansRepository;
 import com.bbdgrad.thebeanindex.repository.CountriesRepository;
-import com.bbdgrad.thebeanindex.repository.GDPwithYearRepository;
+import com.bbdgrad.thebeanindex.repository.GdpRepository;
 import com.bbdgrad.thebeanindex.repository.YearEnumRepository;
 import com.bbdgrad.thebeanindex.Dtos.BeanNamesDto;
 import com.bbdgrad.thebeanindex.Dtos.BeansDto;
 import com.bbdgrad.thebeanindex.Dtos.BeansResponseDto;
-import com.bbdgrad.thebeanindex.Dtos.GDPinBeanDto;
 import com.bbdgrad.thebeanindex.exception.BeanNotFoundException;
 import com.bbdgrad.thebeanindex.exception.CountryNotFoundException;
 import com.bbdgrad.thebeanindex.exception.GDPinBeanNotFoundException;
@@ -23,11 +22,9 @@ import com.bbdgrad.thebeanindex.exception.YearNotFoundException;
 import com.bbdgrad.thebeanindex.model.Beans;
 import com.bbdgrad.thebeanindex.model.Countries;
 import com.bbdgrad.thebeanindex.model.GDP;
-import com.bbdgrad.thebeanindex.model.GDPwithYear;
 import com.bbdgrad.thebeanindex.model.YearEnum;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -45,7 +42,7 @@ public class BeansController {
     CountriesRepository countriesRepository;
 
     @Autowired
-    GDPwithYearRepository gdPwithYearRepository;
+    GdpRepository gdpRepository;
 
 
     @GetMapping("/all")
@@ -76,7 +73,7 @@ public class BeansController {
         Optional<Countries> country = countriesRepository.findReferenceByName(countryName);
         Optional<Beans> bean = beansRepository.findReferenceByName(beanName);
         Optional<YearEnum> year = yearEnumRepository.findReferenceByYear(yearValue);
-        Optional<GDPwithYear> gdp = gdPwithYearRepository
+        Optional<GDP> gdp = gdpRepository
             .findAllReferencesByYearYearAndCountryName(yearValue, countryName);
 
         if (!country.isPresent()) throw new CountryNotFoundException(countryName);
@@ -84,9 +81,9 @@ public class BeansController {
         if (!year.isPresent()) throw new YearNotFoundException(yearValue);
         if (!gdp.isPresent()) throw new GDPinBeanNotFoundException(countryName, yearValue);
 
-        GDPinBeanDto dto = GDPinBeanDto.toDto(gdp.get(), bean.get());
+        // GDPinBeanDto dto = GDPinBeanDto.toDto(gdp.get(), bean.get());
         
-        return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(gdp.get(), HttpStatus.ACCEPTED);
     
     }
 }

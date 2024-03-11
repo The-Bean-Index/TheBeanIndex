@@ -15,7 +15,7 @@ public class GDPDto {
 
     private CountriesDto country;
 
-    private Integer yearId;
+    private Integer year;
 
     private BigDecimal gdpAmount;
 
@@ -23,7 +23,7 @@ public class GDPDto {
         GDPDto dto = new GDPDto();
         dto.setId(gdp.getId());
         dto.setCountry(CountriesDto.toDto(gdp.getCountry()));
-        dto.setYearId(gdp.getYearId());
+        dto.setYear(gdp.getYear().getYear());
         dto.setGdpAmount(gdp.getGdpAmount());
 
         return dto;
