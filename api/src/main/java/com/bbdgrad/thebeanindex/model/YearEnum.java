@@ -29,7 +29,7 @@ public class YearEnum {
     private Integer year;
 
     
-    @OneToMany(mappedBy = "year", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "year")
     List<GDP> gdps = new ArrayList<>();
 
     public YearEnum(Integer id, Integer year, List<GDP> gdps) {
