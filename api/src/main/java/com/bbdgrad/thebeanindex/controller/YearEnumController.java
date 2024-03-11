@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bbdgrad.thebeanindex.Dtos.YearEmunDto;
 import com.bbdgrad.thebeanindex.Dtos.YearsEnumDto;
+import com.bbdgrad.thebeanindex.Dtos.YearEnumAllowedYearsDto;
 import com.bbdgrad.thebeanindex.model.YearEnum;
 import com.bbdgrad.thebeanindex.repository.YearEnumRepository;
 
@@ -64,5 +66,15 @@ public class YearEnumController {
             .toList();
 
         return new ResponseEntity<>(YearsEnumDto.toDto(dtos), HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/all")
+    public YearEnumAllowedYearsDto getAllYears() {
+        List<YearEnum> yearEnums = yearEnum.findAll();
+        List<Integer> years = yearEnums.stream()
+                                       .map(YearEnum::getYear)
+                                       .collect(Collectors.toList());
+
+        return new YearEnumAllowedYearsDto(years);
     }
 }
