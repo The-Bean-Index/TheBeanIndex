@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  run-integration-tests:
+  run-tests:
     defaults:
       run:
         shell: bash
@@ -71,20 +71,14 @@ jobs:
         run: |
           echo "VERSION=$(mvn help:evaluate -Dexpression='project.version' -q -DforceStdout)" >> $GITHUB_ENV
 
-      - name: Run Docker Container
-        run: |
-          docker run --name backend -p 8080:8080 -e DB_DATABASE=$DB_DATABASE  -e DB_USER=$DB_USER  -e DB_PASSWORD=$DB_PASSWORD -m=750M -d the-bean-index:$VERSION
-
       - name: Install Postman CLI
         run: curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
 
       - name: Login to Postman CLI
         run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
 
-      - name: Run integration tests
-        run: postman collection run "29385230-7b98d6e8-d977-4f0e-87fb-b0f8a52ae506"
-
-      - name: Stop Docker Container
+      - name: Run Docker Container
         run: |
-          docker stop backend
-          docker rm backend
+          docker run -p 8080:8080 -e DB_DATABASE=$DB_DATABASE  -e DB_USER=$DB_USER  -e DB_PASSWORD=$DB_PASSWORD -m=750M -d the-bean-index:$VERSION
+          postman collection run "29385230-7b98d6e8-d977-4f0e-87fb-b0f8a52ae506"
+
