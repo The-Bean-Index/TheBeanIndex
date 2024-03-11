@@ -4,7 +4,6 @@ import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.RemovalPolicy;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
-import software.amazon.awscdk.services.apprunner.CfnService;
 import software.amazon.awscdk.services.docdb.DatabaseSecret;
 import software.amazon.awscdk.services.ec2.InstanceType;
 import software.amazon.awscdk.services.ec2.*;
@@ -87,13 +86,49 @@ public class IacStack extends Stack {
             .build();
 
         PolicyStatement getSecretsStatement = PolicyStatement.Builder.create()
-            .actions(List.of("secretsmanager:GetSecretValue"))
+            .actions(List.of("secretsmanager:GetSecretValue", "secretsmanager:ListSecrets"))
+            .effect(Effect.ALLOW)
+            .resources(List.of("*"))
+            .build();
+
+        PolicyStatement ecrGetAuthToken = PolicyStatement.Builder.create()
+            .actions(List.of("ecr:GetAuthorizationToken"))
+            .effect(Effect.ALLOW)
+            .resources(List.of("*"))
+            .build();
+
+        PolicyStatement ec2instancesAndPairs = PolicyStatement.Builder.create()
+            .actions(List.of("ec2:DescribeInstances", "ec2:DescribeKeyPairs"))
+            .effect(Effect.ALLOW)
+            .resources(List.of("*"))
+            .build();
+
+        PolicyStatement getSSMParam = PolicyStatement.Builder.create()
+            .actions(List.of("ssm:GetParameter", "ssm:GetParameters"))
+            .effect(Effect.ALLOW)
+            .resources(List.of("*"))
+            .build();
+
+        PolicyStatement decryptKMS = PolicyStatement.Builder.create()
+            .actions(List.of("kms:Decrypt"))
+            .effect(Effect.ALLOW)
+            .resources(List.of("arn:aws:kms:*:*:key/alias/aws/ssm"))
+            .build();
+
+        PolicyStatement ecrPush = PolicyStatement.Builder.create()
+            .actions(List.of(
+                "ecr:CompleteLayerUpload",
+                "ecr:GetAuthorizationToken",
+                "ecr:UploadLayerPart",
+                "ecr:InitiateLayerUpload",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:PutImage"))
             .effect(Effect.ALLOW)
             .resources(List.of("*"))
             .build();
 
         PolicyDocument policyDocument = PolicyDocument.Builder.create()
-            .statements(List.of(assumeRoleStatement, getSecretsStatement))
+            .statements(List.of(assumeRoleStatement, getSecretsStatement, ecrPush, ec2instancesAndPairs, getSSMParam, decryptKMS))
             .build();
 
         Role githubDeployRole = Role.Builder.create(this, "githubDeployRole")
@@ -103,56 +138,76 @@ public class IacStack extends Stack {
             .inlinePolicies(Map.of("deploymentPolicies", policyDocument))
             .maxSessionDuration(Duration.hours(1))
             .build();
-        //ECR
 
-        Repository appRunnerRepository = Repository.Builder.create(this, "AppRunnerRepository")
+        //ECR
+        Repository theBeanIndexRepository = Repository.Builder.create(this, "TheBeanIndexRepository")
             .imageScanOnPush(true)
             .imageTagMutability(TagMutability.MUTABLE)
             .removalPolicy(RemovalPolicy.DESTROY)
             .repositoryName("the-bean-index")
             .build();
 
-        Role ecrAccessRole = Role.Builder.create(this, "AppRunnerECRRepositoryRole")
-            .assumedBy(new ServicePrincipal("build.apprunner.amazonaws.com"))
+        // EC2
+
+        Role ec2InstanceRole = Role.Builder.create(this, "EC2InstanceRole")
+            .assumedBy(new ServicePrincipal("ec2.amazonaws.com"))
             .managedPolicies(
                 List.of(
                     ManagedPolicy.fromManagedPolicyArn(
                         this,
-                        "AWSAppRunnerServicePolicyForECRAccessPolicy",
-                        "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess"
+                        "AmazonEC2ContainerRegistryReadOnlyPolicy",
+                        "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
                     )
                 )
             )
-            .build();
-        CfnService.AuthenticationConfigurationProperty authenticationConfigurationProperty =
-            CfnService.AuthenticationConfigurationProperty.builder()
-                .accessRoleArn(ecrAccessRole.getRoleArn())
-                .build();
-
-        // App Runner
-        CfnService.ImageRepositoryProperty imageRepositoryProperty = CfnService.ImageRepositoryProperty.builder()
-            .imageIdentifier(appRunnerRepository.getRepositoryUri() + "/the-bean-index:latest")
-            .imageConfiguration(CfnService.ImageConfigurationProperty.builder()
-                .port("80")
-                .build())
-            .imageRepositoryType("ECR")
+            .inlinePolicies(Map.of("ecrPolicies", PolicyDocument.Builder.create()
+                .statements(List.of(ecrGetAuthToken))
+                .build()))
             .build();
 
-        CfnService.SourceConfigurationProperty sourceConfigurationProperty = CfnService.SourceConfigurationProperty.builder()
-            .imageRepository(imageRepositoryProperty)
-            .authenticationConfiguration(authenticationConfigurationProperty)
-            .autoDeploymentsEnabled(true)
+        Vpc ec2Vpc = Vpc.Builder.create(this, "ec2Vpc")
+            .ipAddresses(IpAddresses.cidr("192.0.0.0/16"))
+            .natGateways(1)
+            .maxAzs(2)
+            .subnetConfiguration(List.of(SubnetConfiguration.builder()
+                .name("ec2-public-subnet")
+                .subnetType(SubnetType.PUBLIC)
+                .cidrMask(24)
+                .build()))
             .build();
 
-        CfnService.InstanceConfigurationProperty instanceConfigurationProperty = CfnService.InstanceConfigurationProperty.builder()
-            .cpu("1 vCPU")
-            .memory("2 GB")
+        SecurityGroup ec2Sg = SecurityGroup.Builder.create(this, "ec2InstanceSg")
+            .vpc(ec2Vpc)
+            .allowAllOutbound(true)
+            .securityGroupName("EC2-Instance-Sg")
             .build();
 
-        CfnService.Builder.create(this, "the-bean-index-runner")
-            .serviceName("The-Bean-Index-Runner")
-            .sourceConfiguration(sourceConfigurationProperty)
-            .instanceConfiguration(instanceConfigurationProperty)
+        ec2Sg.addIngressRule(Peer.anyIpv4(), Port.tcp(22), "Allow SSH from the internet");
+        ec2Sg.addIngressRule(Peer.anyIpv4(), Port.tcp(80), "Allow HTTP access from the internet");
+
+        KeyPair keyPair = KeyPair.Builder.create(this, "instanceKeyPair")
+            .keyPairName("EC2-Instance-Key")
+            .physicalName("EC2-Instance-Key")
+            .type(KeyPairType.RSA)
+            .build();
+
+        UserData userData = UserData.forLinux();
+        userData.addCommands(
+            "yum update -y",
+            "yum install docker -y",
+            "service docker start",
+            "usermod -a -G docker ec2-user"
+        );
+
+        Instance ec2Instance = Instance.Builder.create(this, "javaServerInstance")
+            .vpc(ec2Vpc)
+            .role(ec2InstanceRole)
+            .securityGroup(ec2Sg)
+            .instanceName("Java-Server-Instance")
+            .instanceType(instanceType)
+            .machineImage(MachineImage.latestAmazonLinux2023())
+            .keyPair(keyPair)
+            .userData(userData)
             .build();
     }
 }

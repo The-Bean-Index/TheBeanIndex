@@ -26,7 +26,6 @@ import com.bbdgrad.thebeanindex.model.GDP;
 import com.bbdgrad.thebeanindex.model.GDPwithYear;
 import com.bbdgrad.thebeanindex.model.YearEnum;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

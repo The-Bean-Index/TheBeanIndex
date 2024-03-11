@@ -34,8 +34,32 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
+      - name: Restore Maven cache
+        uses: skjolber/maven-cache-github-action@v1
+        with:
+          step: restore
+
+      - name: Get secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2.0.1
+        with:
+          secret-ids: DB, dbSuperUser*
+          parse-json-secrets: true
+
+      - name: Map environment variables
+        run: |
+          echo "DB_DATABASE=jdbc:sqlserver://$DB_HOST:$DB_PORT;authentication=sqlPassword;databaseName=thebeanindex;encrypt=true;trustServerCertificate=true" >> $GITHUB_ENV
+          echo "DB_USER=$DB_USERNAME" >> $GITHUB_ENV
+
+      - name: Run Tests
+        run: mvn test
+
       - name: Build Image
-        run: "mvn spring-boot:build-image"
+        run: mvn spring-boot:build-image -Dmaven.test.skip
+
+      - name: Save Maven cache
+        uses: skjolber/maven-cache-github-action@v1
+        with:
+          step: save
 
       - name: Set VERSION environment variable
         run: |
@@ -46,12 +70,49 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push the image to Amazon ECR
-        id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.ECR_REPO_NAME }}
+          ECR_REPOSITORY: the-bean-index
           IMAGE_TAG: latest
           APP_NAME: the-bean-index
         run: |
-          docker tag $APP_NAME:$VERSION $ECR_REPOSITORY/$APP_NAME:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+          docker tag $APP_NAME:$VERSION $ECR_REGISTRY'/'$ECR_REPOSITORY':'$IMAGE_TAG
+          docker push $ECR_REGISTRY'/'$ECR_REPOSITORY':'$IMAGE_TAG
+          echo "IMAGE_INFO=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
+          echo "ECR_REGISTRY=$ECR_REGISTRY" >> $GITHUB_ENV
+
+      - name: Get EC2 Instance IP and Key Pair ID
+        run: |
+          echo "EC2_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)" >> $GITHUB_ENV
+          echo "KEY_PAIR_ID=$(aws ec2 describe-key-pairs --query 'KeyPairs[*].KeyPairId' --output text)" >> $GITHUB_ENV
+
+      - name: Get Private Key from SSM
+        uses: Bardavon-Health/actions-aws-ssm-params-to-env@v1.3.2
+        with:
+          ssm-path: /ec2/keypair/${{ env.KEY_PAIR_ID }}
+          prefix: SSM_
+          decryption: true
+          mask-values: true
+
+      - name: Map private key
+        run: |
+          {
+            echo 'PRIVATE_KEY<<EOFDELIMITER'
+            printenv 'SSM_'$KEY_PAIR_ID
+            echo EOFDELIMITER
+          } >> $GITHUB_ENV
+
+      - name: Run container on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.EC2_IP }}
+          username: ec2-user
+          key: ${{ env.PRIVATE_KEY }}
+          envs: IMAGE_INFO, ECR_REGISTRY, ECR_REPOSITORY, AWS_REGION, DB_USER, DB_DATABASE, DB_PASSWORD
+          script: |
+            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+            docker pull $IMAGE_INFO
+            docker stop backend
+            docker rm backend
+            docker run --name backend -p 80:8080 -e DB_DATABASE=$DB_DATABASE  -e DB_USER=$DB_USER  -e DB_PASSWORD=$DB_PASSWORD -m=750M -d $IMAGE_INFO

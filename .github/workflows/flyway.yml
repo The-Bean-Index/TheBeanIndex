@@ -1,33 +1,50 @@
+name: 'Deploy Database Changes'
 
-name: 'Flyway Github Actions'
- 
 on:
   push:
     branches:
       - main
-      
+    paths:
+      - flyway/**
+
 env:
   SQLFLUFF_DIALECT: postgres
   DOCKER_IMAGE: redgate/flyway
   SCHEMAS: public
 
-
 jobs:
-
   Continuous-Integration-Build:
     name: Continuous Integration Build
     runs-on: ubuntu-20.04
- 
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v3.0.0
-               
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.1
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Get secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2.0.1
+        with:
+          secret-ids: DB, dbSuperUser*
+          parse-json-secrets: true
+
+      - name: Build JDBC url
+        run: |
+          echo "DB_URL=jdbc:sqlserver://$DB_HOST:$DB_PORT;authentication=sqlPassword;databaseName=thebeanindex;encrypt=true;trustServerCertificate=true" >> $GITHUB_ENV
+
       - name: Continuous Integration Flyway Clean Migrate
         run: >-
           docker run --rm
           --volume ${{ github.workspace }}/Flyway/migrations:/flyway/sql:ro
           "${{ env.DOCKER_IMAGE }}"
-          -url="${{ secrets.DB_URL }}"
-          -user="${{ secrets.DB_USERNAME }}"
-          -password="${{ secrets.DB_PASSWORD }}"
+          -url="${{ env.DB_URL }}"
+          -user="${{ env.DB_USERNAME }}"
+          -password="${{ env.DB_PASSWORD }}"
           info migrate

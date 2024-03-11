@@ -1,19 +1,14 @@
 package com.bbdgrad.thebeanindex.Dtos;
 
+import lombok.Data;
+
 import java.util.List;
 
+@Data
 public class BeansResponseDto {
     private List<BeansDto> Beans;
 
     public BeansResponseDto(List<BeansDto> beans) {
-        this.Beans = beans;
-    }
-
-    public List<BeansDto> getBeans() {
-        return Beans;
-    }
-
-    public void setBeans(List<BeansDto> beans) {
         this.Beans = beans;
     }
 }
