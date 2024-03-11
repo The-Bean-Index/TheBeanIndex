@@ -15,6 +15,7 @@ import com.bbdgrad.thebeanindex.repository.YearEnumRepository;
 import com.bbdgrad.thebeanindex.Dtos.BeanNamesDto;
 import com.bbdgrad.thebeanindex.Dtos.BeansDto;
 import com.bbdgrad.thebeanindex.Dtos.BeansResponseDto;
+import com.bbdgrad.thebeanindex.Dtos.GDPDto;
 import com.bbdgrad.thebeanindex.exception.BeanNotFoundException;
 import com.bbdgrad.thebeanindex.exception.CountryNotFoundException;
 import com.bbdgrad.thebeanindex.exception.GDPinBeanNotFoundException;
@@ -81,9 +82,9 @@ public class BeansController {
         if (!year.isPresent()) throw new YearNotFoundException(yearValue);
         if (!gdp.isPresent()) throw new GDPinBeanNotFoundException(countryName, yearValue);
 
-        // GDPinBeanDto dto = GDPinBeanDto.toDto(gdp.get(), bean.get());
+        GDPDto dto = GDPDto.toDto(gdp.get());
         
-        return new ResponseEntity<>(gdp.get(), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
     
     }
 }
