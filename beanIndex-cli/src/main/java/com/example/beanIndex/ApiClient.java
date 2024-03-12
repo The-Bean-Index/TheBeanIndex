@@ -87,4 +87,22 @@ public class ApiClient {
 
         return new ArrayList<>();
     }
+    public Integer getGDPForCountryInTermsOfBeans(String country, String beanType, int year) {
+        String url = baseUrl + "/beans/gdpOfCountryInTermsOfBeans/" + country + "/" + beanType + "/" + year;
+
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            if (response != null) {
+                Integer gdpAmount = (Integer) response.get("gdpAmount");
+                return gdpAmount;
+            } else {
+                System.out.println("No response received from the server.");
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

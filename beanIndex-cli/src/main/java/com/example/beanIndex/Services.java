@@ -33,7 +33,11 @@ public class Services {
     
     public List<Integer> getAllYears() {
             return apiClient.getAllYears();
-        }
+    }
+
+    public Integer getGDPForCountryInTermsOfBeans(String country, String beanType, int year) {
+        return apiClient.getGDPForCountryInTermsOfBeans(country, beanType, year);
+    }
     public Double getGDPForCountryAndYear(String country, int year, String beanType) {
         if (!country.equalsIgnoreCase("Country A")) {
             return null;

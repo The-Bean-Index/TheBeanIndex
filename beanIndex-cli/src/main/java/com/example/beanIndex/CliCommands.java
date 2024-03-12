@@ -71,6 +71,23 @@ public class CliCommands {
         System.out.println(gdpInBeans + " " + beanType + " beans");
     }
    
+    //4.
+   @ShellMethod(key = "gdp country beans", value = "Get GDP of a country for a specific year in terms of beans")
+    public void gdpCountryBeans(
+            @ShellOption(value = {"-c", "--country"}, help = "Country name") String country,
+            @ShellOption(value = {"-b", "--bean"}, help = "Bean type (e.g., Soybeans)") String beanType,
+            @ShellOption(value = {"-y", "--year"}, help = "Year") int year) {
+
+        Integer gdpAmount = services.getGDPForCountryInTermsOfBeans(country, beanType, year);
+
+        if (gdpAmount == null) {
+            System.out.println("GDP data for " + country + " and year " + year + " is not available.");
+            return;
+        }
+
+        System.out.println("GDP for " + country + " in year " + year + " in terms of " + beanType + " beans:");
+        System.out.println(gdpAmount);
+    }
 
     //5. Report of all countries GDP (ranked)
     @ShellMethod(key = "ranked gdp", value = "Rank countries by GDP for the current year")
