@@ -3,6 +3,9 @@ package com.example.beanIndex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -14,24 +17,36 @@ import java.util.Map;
 @Component
 public class ApiClient {
     private final RestTemplate restTemplate;
+    private final AuthService authService;
 
     @Value("${backend.baseurl}")
     private String baseUrl;
 
+
     @Autowired
-    public ApiClient(RestTemplate restTemplate) {
+    public ApiClient(RestTemplate restTemplate, AuthService authService) {
         this.restTemplate = restTemplate;
+        this.authService = authService;
     }
+
+
+    public HttpEntity<Void> createHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", authService.getIdToken());
+        return new HttpEntity<>(headers);
+    }
+
 
     public List<String> getCountryNames() {
         String countriesUrl = baseUrl + "/countries/names";
 
         try {
             ResponseEntity<Map<String, Object>> responseEntity = restTemplate.exchange(
-                    countriesUrl,
-                    org.springframework.http.HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<Map<String, Object>>() {});
+                countriesUrl,
+                org.springframework.http.HttpMethod.GET,
+                createHeaders(),
+                new ParameterizedTypeReference<Map<String, Object>>() {
+                });
 
             if (responseEntity.getBody() != null) {
                 Map<String, Object> responseBody = responseEntity.getBody();
@@ -44,16 +59,18 @@ public class ApiClient {
 
         return new ArrayList<>();
     }
-    
+
+
     public List<String> getBeanNames() {
         String beansUrl = baseUrl + "/beans/names";
 
         try {
             ResponseEntity<Map<String, Object>> responseEntity = restTemplate.exchange(
-                    beansUrl,
-                    org.springframework.http.HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<Map<String, Object>>() {});
+                beansUrl,
+                org.springframework.http.HttpMethod.GET,
+                createHeaders(),
+                new ParameterizedTypeReference<Map<String, Object>>() {
+                });
 
             if (responseEntity.getBody() != null) {
                 Map<String, Object> responseBody = responseEntity.getBody();
@@ -66,15 +83,18 @@ public class ApiClient {
 
         return new ArrayList<>();
     }
+
+
     public List<Integer> getAllYears() {
         String allYearsUrl = baseUrl + "/year/all";
 
         try {
             ResponseEntity<Map<String, Object>> responseEntity = restTemplate.exchange(
-                    allYearsUrl,
-                    org.springframework.http.HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<Map<String, Object>>() {});
+                allYearsUrl,
+                org.springframework.http.HttpMethod.GET,
+                createHeaders(),
+                new ParameterizedTypeReference<Map<String, Object>>() {
+                });
 
             if (responseEntity.getBody() != null) {
                 Map<String, Object> responseBody = responseEntity.getBody();
@@ -87,14 +107,23 @@ public class ApiClient {
 
         return new ArrayList<>();
     }
+
+
     public Integer getGDPForCountryInTermsOfBeans(String country, String beanType, int year) {
         String url = baseUrl + "/beans/gdpOfCountryInTermsOfBeans/" + country + "/" + beanType + "/" + year;
 
         try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-            if (response != null) {
-                Integer gdpAmount = (Integer) response.get("gdpAmount");
+            ResponseEntity<Map<String, Object>> responseEntity = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                createHeaders(),
+                new ParameterizedTypeReference<Map<String, Object>>() {
+                }
+            );
+
+            if (responseEntity.getBody() != null) {
+                Map<String, Object> responseBody = responseEntity.getBody();
+                Integer gdpAmount = (Integer) responseBody.get("gdpAmount");
                 return gdpAmount;
             } else {
                 System.out.println("No response received from the server.");
