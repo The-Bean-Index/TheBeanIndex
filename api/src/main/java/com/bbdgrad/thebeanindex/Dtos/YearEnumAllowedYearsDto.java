@@ -12,7 +12,5 @@ public class YearEnumAllowedYearsDto {
     public YearEnumAllowedYearsDto(List<Integer> years) {
         this.years = years;
     }
-
-    // Getters and setters (optional, can be generated using Lombok)
 }
 
