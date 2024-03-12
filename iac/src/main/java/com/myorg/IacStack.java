@@ -67,6 +67,7 @@ public class IacStack extends Stack {
             .securityGroups(List.of(databaseSecurityGroup))
             .credentials(Credentials.fromSecret(dbSuperUserSecret))
             .backupRetention(Duration.days(0))
+            .allocatedStorage(20)
             .removalPolicy(RemovalPolicy.DESTROY)
             .build();
 
