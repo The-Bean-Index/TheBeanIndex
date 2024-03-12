@@ -30,7 +30,10 @@ public class Services {
     public List<String> getBeans() {
         return apiClient.getBeanNames();
     }
-
+    
+    public List<Integer> getAllYears() {
+            return apiClient.getAllYears();
+        }
     public Double getGDPForCountryAndYear(String country, int year, String beanType) {
         if (!country.equalsIgnoreCase("Country A")) {
             return null;

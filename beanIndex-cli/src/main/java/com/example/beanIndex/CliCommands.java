@@ -38,6 +38,21 @@ public class CliCommands {
             System.out.println(beanName);
         }
     }
+    //3. Get all possible years from the database
+    @ShellMethod(key = "all years", value = "Get all possible years")
+    public void getAllYears() {
+        List<Integer> years = services.getAllYears();
+
+        if (years.isEmpty()) {
+            System.out.println("No years found in the database.");
+            return;
+        }
+
+        System.out.println("All possible years in the database:");
+        for (Integer year : years) {
+            System.out.println(year);
+        }
+    }
     //3. Get GDP of a country for a specific year in terms of beans
     @ShellMethod(key = "gdp for year", value = "Get GDP for a specific country and year in terms of beans")
     public void gdpForYear(

@@ -66,4 +66,25 @@ public class ApiClient {
 
         return new ArrayList<>();
     }
+    public List<Integer> getAllYears() {
+        String allYearsUrl = baseUrl + "/year/all";
+
+        try {
+            ResponseEntity<Map<String, Object>> responseEntity = restTemplate.exchange(
+                    allYearsUrl,
+                    org.springframework.http.HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {});
+
+            if (responseEntity.getBody() != null) {
+                Map<String, Object> responseBody = responseEntity.getBody();
+                List<Integer> years = (List<Integer>) responseBody.get("years");
+                return years != null ? years : new ArrayList<>();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
+    }
 }
