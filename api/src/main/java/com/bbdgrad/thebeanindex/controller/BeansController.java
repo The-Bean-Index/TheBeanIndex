@@ -16,6 +16,7 @@ import com.bbdgrad.thebeanindex.Dtos.BeanNamesDto;
 import com.bbdgrad.thebeanindex.Dtos.BeansDto;
 import com.bbdgrad.thebeanindex.Dtos.BeansResponseDto;
 import com.bbdgrad.thebeanindex.Dtos.GDPDto;
+import com.bbdgrad.thebeanindex.Dtos.GDPRatioDto;
 import com.bbdgrad.thebeanindex.exception.BeanNotFoundException;
 import com.bbdgrad.thebeanindex.exception.CountryNotFoundException;
 import com.bbdgrad.thebeanindex.exception.GDPinBeanNotFoundException;
@@ -25,6 +26,8 @@ import com.bbdgrad.thebeanindex.model.Countries;
 import com.bbdgrad.thebeanindex.model.GDP;
 import com.bbdgrad.thebeanindex.model.YearEnum;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -86,5 +89,39 @@ public class BeansController {
         
         return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
     
+    }
+
+    @GetMapping("/gdpRatio/{countryName1}/{countryName2}/{beanName}/{year}")
+    public ResponseEntity<GDPRatioDto> getGDPRatio(
+            @PathVariable String countryName1,
+            @PathVariable String countryName2,
+            @PathVariable String beanName,
+            @PathVariable(name = "year") int yearValue
+    ) {
+        Optional<GDP> gdp1 = gdpRepository.findAllReferencesByYearYearAndCountryName(yearValue, countryName1);
+        Optional<GDP> gdp2 = gdpRepository.findAllReferencesByYearYearAndCountryName(yearValue, countryName2);
+        Optional<Beans> bean = beansRepository.findReferenceByName(beanName);
+
+        if (!gdp1.isPresent()) throw new GDPinBeanNotFoundException(countryName1, yearValue);
+        if (!gdp2.isPresent()) throw new GDPinBeanNotFoundException(countryName2, yearValue);
+        if (!bean.isPresent()) throw new IllegalArgumentException("Bean not found: " + beanName);
+
+        BigDecimal beanValue = bean.get().getBeanPrice();
+
+        if (beanValue.compareTo(BigDecimal.ZERO) == 0) {
+            throw new ArithmeticException("Division by zero");
+        }
+
+        BigDecimal gdpAmount1 = gdp1.get().getGdpAmount();
+        BigDecimal gdpAmount2 = gdp2.get().getGdpAmount();
+
+        BigDecimal ratioNumerator = gdpAmount2.divide(beanValue, 2, RoundingMode.HALF_UP);
+        BigDecimal ratioDenominator = gdpAmount1.divide(beanValue, 2, RoundingMode.HALF_UP);
+
+        BigDecimal gdpRatio = ratioNumerator.divide(ratioDenominator, 2, RoundingMode.HALF_UP);
+
+        GDPRatioDto dto = new GDPRatioDto(gdpRatio.setScale(2, RoundingMode.HALF_UP));
+
+        return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
     }
 }
