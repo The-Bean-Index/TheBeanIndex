@@ -37,12 +37,12 @@ public class IacStack extends Stack {
             .username("DBSuperUser")
             .build();
 
-        Vpc dbVpc = Vpc.Builder.create(this, "dbVpc")
+        Vpc customVpc = Vpc.Builder.create(this, "customVpc")
             .ipAddresses(IpAddresses.cidr("10.0.0.0/16"))
             .natGateways(1)
-            .maxAzs(3)
+            .maxAzs(2)
             .subnetConfiguration(List.of(SubnetConfiguration.builder()
-                .name("public-subnet-1")
+                .name("public-subnet")
                 .subnetType(SubnetType.PUBLIC)
                 .cidrMask(24)
                 .build()))
@@ -51,14 +51,14 @@ public class IacStack extends Stack {
         SecurityGroup databaseSecurityGroup = SecurityGroup.Builder.create(this, "database-SG")
             .securityGroupName("database-SG")
             .allowAllOutbound(false)
-            .vpc(dbVpc)
+            .vpc(customVpc)
             .build();
 
         databaseSecurityGroup.addEgressRule(Peer.anyIpv4(), Port.tcp(PORT));
         databaseSecurityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(PORT));
 
         DatabaseInstance databaseInstance = DatabaseInstance.Builder.create(this, "the-bean-index-instance")
-            .vpc(dbVpc)
+            .vpc(customVpc)
             .vpcSubnets(SubnetSelection.builder()
                 .subnetType(SubnetType.PUBLIC)
                 .build())
@@ -166,19 +166,8 @@ public class IacStack extends Stack {
                 .build()))
             .build();
 
-        Vpc ec2Vpc = Vpc.Builder.create(this, "ec2Vpc")
-            .ipAddresses(IpAddresses.cidr("192.0.0.0/16"))
-            .natGateways(1)
-            .maxAzs(2)
-            .subnetConfiguration(List.of(SubnetConfiguration.builder()
-                .name("ec2-public-subnet")
-                .subnetType(SubnetType.PUBLIC)
-                .cidrMask(24)
-                .build()))
-            .build();
-
         SecurityGroup ec2Sg = SecurityGroup.Builder.create(this, "ec2InstanceSg")
-            .vpc(ec2Vpc)
+            .vpc(customVpc)
             .allowAllOutbound(true)
             .securityGroupName("EC2-Instance-Sg")
             .build();
@@ -201,7 +190,7 @@ public class IacStack extends Stack {
         );
 
         Instance ec2Instance = Instance.Builder.create(this, "javaServerInstance")
-            .vpc(ec2Vpc)
+            .vpc(customVpc)
             .role(ec2InstanceRole)
             .securityGroup(ec2Sg)
             .instanceName("Java-Server-Instance")
