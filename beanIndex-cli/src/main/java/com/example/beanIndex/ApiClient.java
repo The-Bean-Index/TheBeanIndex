@@ -22,7 +22,7 @@ public class ApiClient {
     public ApiClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
-
+    //List of countries allowed
     public List<String> getCountryNames() {
         String countriesUrl = baseUrl + "/countries/names";
 
@@ -44,7 +44,7 @@ public class ApiClient {
 
         return new ArrayList<>();
     }
-    
+    //List of beans allowed
     public List<String> getBeanNames() {
         String beansUrl = baseUrl + "/beans/names";
 
@@ -66,6 +66,7 @@ public class ApiClient {
 
         return new ArrayList<>();
     }
+    //List of years allowed
     public List<Integer> getAllYears() {
         String allYearsUrl = baseUrl + "/year/all";
 
@@ -87,17 +88,45 @@ public class ApiClient {
 
         return new ArrayList<>();
     }
+    //Get GDP of a country for a specific year in terms of beans
     public Integer getGDPForCountryInTermsOfBeans(String country, String beanType, int year) {
         String url = baseUrl + "/beans/gdpOfCountryInTermsOfBeans/" + country + "/" + beanType + "/" + year;
 
         try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-            if (response != null) {
-                Integer gdpAmount = (Integer) response.get("gdpAmount");
+            ResponseEntity<Map<String, Object>> responseEntity = restTemplate.exchange(
+                    url,
+                    org.springframework.http.HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {});
+
+            if (responseEntity.getBody() != null && responseEntity.getBody().containsKey("gdpAmount")) {
+                Integer gdpAmount = (Integer) responseEntity.getBody().get("gdpAmount");
                 return gdpAmount;
             } else {
-                System.out.println("No response received from the server.");
+                System.out.println("No response received from the server or gdpAmount not found.");
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Double getGDPRatioForCountries(String country1, String country2, String beanType, int year) {
+        String url = baseUrl + "/beans/gdpRatio/" + country1 + "/" + country2 + "/" + beanType + "/" + year;
+
+        try {
+            ResponseEntity<Map<String, Double>> responseEntity = restTemplate.exchange(
+                    url,
+                    org.springframework.http.HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, Double>>() {});
+
+            if (responseEntity.getBody() != null && responseEntity.getBody().containsKey("ratio")) {
+                Double ratio = responseEntity.getBody().get("ratio");
+                return ratio;
+            } else {
+                System.out.println("No response received from the server or ratio not found.");
                 return null;
             }
         } catch (Exception e) {
