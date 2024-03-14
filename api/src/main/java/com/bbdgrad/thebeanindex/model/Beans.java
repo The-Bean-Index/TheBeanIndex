@@ -24,9 +24,9 @@ public class Beans {
     @Column(name = "beanprice", precision = 10, scale = 2)
     private BigDecimal beanPrice;
 
-    public Beans(Integer id, String name, BigDecimal beanPrice) {
+    public Beans(Integer id, String name, BigDecimal i) {
         this.id = id;
         this.name = name;
-        this.beanPrice = beanPrice;
+        this.beanPrice = i;
     }
 }

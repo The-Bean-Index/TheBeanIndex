@@ -28,8 +28,7 @@ public class YearEnum {
 
     private Integer year;
 
-    
-    @OneToMany(mappedBy = "year")
+    @OneToMany(mappedBy = "year", fetch = FetchType.EAGER) 
     List<GDP> gdps = new ArrayList<>();
 
     public YearEnum(Integer id, Integer year, List<GDP> gdps) {
