@@ -1,6 +1,6 @@
-package com.example.beanIndex;
+package com.bbdgrad.beanIndex;
 
-import com.example.beanIndex.models.AuthRecord;
+import com.bbdgrad.beanIndex.models.AuthRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;

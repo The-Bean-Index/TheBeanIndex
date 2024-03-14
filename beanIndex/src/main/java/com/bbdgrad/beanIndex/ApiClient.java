@@ -1,4 +1,4 @@
-package com.example.beanIndex;
+package com.bbdgrad.beanIndex;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -124,7 +124,7 @@ public class ApiClient {
                 });
 
             if (responseEntity.getBody() != null && responseEntity.getBody().containsKey("gdpAmount")) {
-                Double gdpAmount =  (Double)responseEntity.getBody().get("gdpAmount");
+                Double gdpAmount = (Double) responseEntity.getBody().get("gdpAmount");
                 return gdpAmount;
             } else {
                 System.out.println("No response received from the server or gdpAmount not found.");
@@ -135,6 +135,7 @@ public class ApiClient {
             return null;
         }
     }
+
 
     //Compare GDP of countries in terms of beans
     public Double getGDPRatioForCountries(String country1, String country2, String beanType, int year) {

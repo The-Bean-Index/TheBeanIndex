@@ -1,6 +1,6 @@
-package com.example.beanIndex;
+package com.bbdgrad.beanIndex;
 
-import com.example.beanIndex.models.AuthRecord;
+import com.bbdgrad.beanIndex.models.AuthRecord;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -27,7 +27,7 @@ public class AuthService {
         if (Objects.isNull(idToken)) {
             return false;
         }
-        
+
         if (new Date().after(expiration)) {
             this.logout();
             return false;
