@@ -43,6 +43,9 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
+      - name: Check maven version
+        run: mvn -v
+
       - name: Restore Maven cache
         uses: skjolber/maven-cache-github-action@v1
         with:
