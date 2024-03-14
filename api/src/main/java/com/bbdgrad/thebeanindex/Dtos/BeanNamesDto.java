@@ -1,4 +1,4 @@
-package com.bbdgrad.thebeanindex.Dtos;
+package com.bbdgrad.thebeanindex.dtos;
 
 import lombok.Data;
 

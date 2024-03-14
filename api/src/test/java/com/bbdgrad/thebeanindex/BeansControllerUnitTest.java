@@ -17,9 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.bbdgrad.thebeanindex.Dtos.BeanGDPDto;
-import com.bbdgrad.thebeanindex.Dtos.GDPDto;
 import com.bbdgrad.thebeanindex.controller.BeansController;
+import com.bbdgrad.thebeanindex.dtos.BeanGDPDto;
+import com.bbdgrad.thebeanindex.dtos.GDPDto;
 import com.bbdgrad.thebeanindex.model.Beans;
 import com.bbdgrad.thebeanindex.model.Countries;
 import com.bbdgrad.thebeanindex.model.GDP;

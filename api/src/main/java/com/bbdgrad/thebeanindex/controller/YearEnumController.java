@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bbdgrad.thebeanindex.Dtos.BeanGDPDto;
-import com.bbdgrad.thebeanindex.Dtos.YearEmunDto;
-import com.bbdgrad.thebeanindex.Dtos.YearsEnumDto;
-import com.bbdgrad.thebeanindex.Dtos.YearEnumAllowedYearsDto;
 import com.bbdgrad.thebeanindex.model.GDP;
+import com.bbdgrad.thebeanindex.dtos.BeanGDPDto;
+import com.bbdgrad.thebeanindex.dtos.YearEmunDto;
+import com.bbdgrad.thebeanindex.dtos.YearEnumAllowedYearsDto;
+import com.bbdgrad.thebeanindex.dtos.YearsEnumDto;
 import com.bbdgrad.thebeanindex.model.Beans;
 import com.bbdgrad.thebeanindex.model.YearEnum;
 import com.bbdgrad.thebeanindex.repository.YearEnumRepository;

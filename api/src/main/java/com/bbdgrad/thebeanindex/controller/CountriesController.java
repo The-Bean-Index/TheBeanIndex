@@ -8,9 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.bbdgrad.thebeanindex.repository.CountriesRepository;
-import com.bbdgrad.thebeanindex.Dtos.CountryNamesDto;
-import com.bbdgrad.thebeanindex.Dtos.CountriesDto;
-import com.bbdgrad.thebeanindex.Dtos.CountriesResponseDto;
+import com.bbdgrad.thebeanindex.dtos.CountriesDto;
+import com.bbdgrad.thebeanindex.dtos.CountriesResponseDto;
+import com.bbdgrad.thebeanindex.dtos.CountryNamesDto;
 import com.bbdgrad.thebeanindex.model.Countries;
 
 import java.util.List;
