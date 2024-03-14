@@ -43,9 +43,12 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
-      - name: Run the Maven verify phase
-        run: mvn --batch-mode --update-snapshots verify
+      - name: Update Maven
+        run: apt-get --only-upgrade install maven -y
 
+      - name: Get Maven version
+        run: mvn -v
+      
       - name: Restore Maven cache
         uses: skjolber/maven-cache-github-action@v1
         with:
