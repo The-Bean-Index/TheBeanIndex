@@ -13,7 +13,7 @@ jobs:
     defaults:
       run:
         shell: pwsh
-        working-directory: ./beanIndex
+        working-directory: .\beanIndex
     runs-on: windows-latest
     env:
       APP_NAME: bean-index-cli
@@ -34,7 +34,7 @@ jobs:
           echo "API_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)" >> $env:GITHUB_ENV
 
       - name: Write google credential file
-        run: echo "${{ secrets.GOOGLE_CLIENT }}" > ./src/main/resources/client_secret.json
+        run: echo "${{ secrets.GOOGLE_CLIENT }}" > .\src\main\resources\client_secret.json
 
       - name: Replace API base URL
         working-directory: .\beanIndex\src\main\resources
@@ -43,7 +43,8 @@ jobs:
 
       - name: Set VERSION environment variable
         run: |
-          echo "VERSION=$(mvn help:evaluate -Dexpression='project.version' -q -DforceStdout)" >> $env:GITHUB_ENV
+          $version=mvn help:evaluate -Dexpression='project.version' -q -DforceStdout
+          echo "VERSION=$version" >> $env:GITHUB_ENV
 
       - name: Package application
         run: |
@@ -51,7 +52,7 @@ jobs:
           jpackage --verbose `
             --input ./target `
             --main-jar $env:APP_NAME-$env:VERSION.jar `
-            --name $APP_NAME `
+            --name $env:APP_NAME `
             --dest build/distributions `
             --vendor TheBeanIndex `
             --win-console `
@@ -77,7 +78,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/distribution/$APP_NAME-$VERSION.exe
-          asset_name: $APP_NAME-$VERSION.exe
+          asset_path: ./build/distribution/$env:APP_NAME-$env:VERSION.exe
+          asset_name: $env:APP_NAME-$env:VERSION.exe
           asset_content_type: application/vnd.microsoft.portable-executable
       
