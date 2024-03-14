@@ -4,14 +4,12 @@ import com.example.beanIndex.models.AuthRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @ShellComponent
 public class CliCommands extends SecuredCommand {
@@ -27,7 +25,7 @@ public class CliCommands extends SecuredCommand {
 
     //1. List of countries allowed
     @ShellMethod(key = "list countries", value = "List all countries")
-//    @ShellMethodAvailability("isUserSignedIn")
+    @ShellMethodAvailability("isUserSignedIn")
     public void listCountries() {
         List<String> countries = services.getCountries();
         for (String country : countries) {
@@ -38,6 +36,7 @@ public class CliCommands extends SecuredCommand {
 
     //2. List of beans allowed
     @ShellMethod(key = "list beans", value = "List all beans in the application context")
+    @ShellMethodAvailability("isUserSignedIn")
     public void listBeans() {
         List<String> beanNames = services.getBeans();
         for (String beanName : beanNames) {
@@ -48,6 +47,7 @@ public class CliCommands extends SecuredCommand {
 
     //3. List of years allowed
     @ShellMethod(key = "all years", value = "Get all possible years")
+    @ShellMethodAvailability("isUserSignedIn")
     public void getAllYears() {
         List<Integer> years = services.getAllYears();
 
@@ -62,8 +62,10 @@ public class CliCommands extends SecuredCommand {
         }
     }
 
+
     //4. Get GDP of a country for a specific year in terms of beans
     @ShellMethod(key = "gdp country beans", value = "Get GDP of a country for a specific year in terms of beans")
+    @ShellMethodAvailability("isUserSignedIn")
     public void gdpCountryBeans(
         @ShellOption(value = {"-c", "--country"}, help = "Country name") String country,
         @ShellOption(value = {"-b", "--bean"}, help = "Bean type (e.g., Soybeans)") String beanType,
@@ -82,24 +84,19 @@ public class CliCommands extends SecuredCommand {
 
 
     //5. Compare GDP of countries in terms of beans
-
-
     @ShellMethod(key = "compare gdp", value = "Compare GDP of two countries in terms of beans")
+    @ShellMethodAvailability("isUserSignedIn")
     public void compareGDP(
         @ShellOption(value = {"--country1", "-c1"}, help = "First country name") String country1,
         @ShellOption(value = {"--country2", "-c2"}, help = "Second country name") String country2,
         @ShellOption(value = {"--bean", "-b"}, help = "Bean type (coffee or cocoa)") String beanType,
         @ShellOption(value = {"--year", "-y"}, help = "Year") int year) {
-         Double ratio = services.getGDPRatioForCountries(country1, country2, beanType, year);
-
-        
+        Double ratio = services.getGDPRatioForCountries(country1, country2, beanType, year);
 
         if (ratio == null) {
             System.out.println("GDP data for one or both countries is not available.");
             return;
         }
-
-        
 
         System.out.println("GDP ratio of " + country1 + " to " + country2 + " in terms of " + beanType + " beans:");
         System.out.println(ratio);
@@ -112,5 +109,13 @@ public class CliCommands extends SecuredCommand {
         AuthRecord authRecord = auth.signIn();
         authService.setAuth(authRecord);
         System.out.println("Logged in successfully");
+    }
+
+
+    @ShellMethod(key = "logout", value = "logout")
+    public void logout() throws GeneralSecurityException, IOException {
+
+        authService.logout();
+        System.out.println("Logged out successfully");
     }
 }

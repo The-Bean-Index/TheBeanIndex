@@ -27,7 +27,18 @@ public class AuthService {
         if (Objects.isNull(idToken)) {
             return false;
         }
+        
+        if (new Date().after(expiration)) {
+            this.logout();
+            return false;
+        }
 
-        return new Date().before(expiration);
+        return true;
+    }
+
+
+    public void logout() {
+        idToken = null;
+        expiration = null;
     }
 }
