@@ -50,7 +50,7 @@ jobs:
       - name: Replace API base URL
         working-directory: .\beanIndex\src\main\resources
         run: |
-          (Get-Content application.properties) -replace “http://localhost:8080”, "${{ env.API_IP }}"
+          ((Get-Content application.properties) -replace “http://localhost:8080”, "${{ env.API_IP }}" | Set-Content application.properties
 
       - name: Set VERSION environment variable
         run: |
