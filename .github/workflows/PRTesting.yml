@@ -23,6 +23,8 @@ jobs:
         shell: bash
         working-directory: ./api
     runs-on: ubuntu-latest
+    env:
+      ENABLE_AUTHENTICATION: false
     permissions:
       id-token: write
       contents: read
@@ -79,8 +81,6 @@ jobs:
         run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
 
       - name: Run Container and Integration tests
-        env:
-          ENABLE_AUTHENTICATION: false
         run: |
           docker run -p 8080:8080 -e DB_DATABASE=$DB_DATABASE  -e DB_USER=$DB_USER  -e DB_PASSWORD=$DB_PASSWORD -e ENABLE_AUTHENTICATION=$ENABLE_AUTHENTICATION -m=750M -d the-bean-index:$VERSION
           sleep 10
