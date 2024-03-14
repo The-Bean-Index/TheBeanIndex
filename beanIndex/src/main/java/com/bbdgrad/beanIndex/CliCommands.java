@@ -105,7 +105,7 @@ public class CliCommands extends SecuredCommand {
 
     @ShellMethod(key = "login", value = "Login via Google")
     public void login() throws GeneralSecurityException, IOException {
-        com.example.beanIndex.GoogleAuth auth = new com.example.beanIndex.GoogleAuth();
+        GoogleAuth auth = new GoogleAuth();
         AuthRecord authRecord = auth.signIn();
         authService.setAuth(authRecord);
         System.out.println("Logged in successfully");
