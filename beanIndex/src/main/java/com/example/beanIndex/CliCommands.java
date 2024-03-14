@@ -71,7 +71,7 @@ public class CliCommands extends SecuredCommand {
         @ShellOption(value = {"-b", "--bean"}, help = "Bean type (e.g., Soybeans)") String beanType,
         @ShellOption(value = {"-y", "--year"}, help = "Year") int year) {
 
-        Integer gdpAmount = services.getGDPForCountryInTermsOfBeans(country, beanType, year);
+        Double gdpAmount = services.getGDPForCountryInTermsOfBeans(country, beanType, year);
 
         if (gdpAmount == null) {
             System.out.println("GDP data for " + country + " and year " + year + " is not available.");

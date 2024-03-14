@@ -33,7 +33,7 @@ public class Services {
             return apiClient.getAllYears();
     }
 
-    public Integer getGDPForCountryInTermsOfBeans(String country, String beanType, int year) {
+    public Double getGDPForCountryInTermsOfBeans(String country, String beanType, int year) {
         return apiClient.getGDPForCountryInTermsOfBeans(country, beanType, year);
     }
     

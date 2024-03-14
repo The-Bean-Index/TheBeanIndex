@@ -112,9 +112,9 @@ public class ApiClient {
 
 
     //Get GDP of a country for a specific year in terms of beans
-    public Integer getGDPForCountryInTermsOfBeans(String country, String beanType, int year) {
+    public Double getGDPForCountryInTermsOfBeans(String country, String beanType, int year) {
         String url = baseUrl + "/beans/gdpOfCountryInTermsOfBeans/" + country + "/" + beanType + "/" + year;
-
+        System.out.println(beanType);
         try {
             ResponseEntity<Map<String, Object>> responseEntity = restTemplate.exchange(
                 url,
@@ -124,7 +124,7 @@ public class ApiClient {
                 });
 
             if (responseEntity.getBody() != null && responseEntity.getBody().containsKey("gdpAmount")) {
-                Integer gdpAmount = (Integer) responseEntity.getBody().get("gdpAmount");
+                Double gdpAmount =  (Double)responseEntity.getBody().get("gdpAmount");
                 return gdpAmount;
             } else {
                 System.out.println("No response received from the server or gdpAmount not found.");
@@ -136,7 +136,7 @@ public class ApiClient {
         }
     }
 
-
+    //Compare GDP of countries in terms of beans
     public Double getGDPRatioForCountries(String country1, String country2, String beanType, int year) {
         String url = baseUrl + "/beans/gdpRatio/" + country1 + "/" + country2 + "/" + beanType + "/" + year;
 
