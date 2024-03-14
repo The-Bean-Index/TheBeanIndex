@@ -12,6 +12,7 @@ import com.bbdgrad.thebeanindex.repository.BeansRepository;
 import com.bbdgrad.thebeanindex.repository.CountriesRepository;
 import com.bbdgrad.thebeanindex.repository.GdpRepository;
 import com.bbdgrad.thebeanindex.repository.YearEnumRepository;
+import com.bbdgrad.thebeanindex.Dtos.BeanGDPDto;
 import com.bbdgrad.thebeanindex.Dtos.BeanNamesDto;
 import com.bbdgrad.thebeanindex.Dtos.BeansDto;
 import com.bbdgrad.thebeanindex.Dtos.BeansResponseDto;
@@ -69,26 +70,30 @@ public class BeansController {
     }
 
     @GetMapping("/gdpOfCountryInTermsOfBeans/{countryName}/{beanName}/{year}")
-    public ResponseEntity<?> getGDPofCountryInBeans(
-        @PathVariable String countryName, 
-        @PathVariable String beanName, 
-        @PathVariable(name = "year") int yearValue
+    public ResponseEntity<BeanGDPDto> getGDPOfCountryInBeans( // ResponseEntity<GDPRatioDto>
+            @PathVariable String countryName,
+            @PathVariable String beanName,
+            @PathVariable(name = "year") int yearValue
     ) {
-        Optional<Countries> country = countriesRepository.findReferenceByName(countryName);
+        Optional<GDP> gdp = gdpRepository.findAllReferencesByYearYearAndCountryName(yearValue, countryName);
         Optional<Beans> bean = beansRepository.findReferenceByName(beanName);
-        Optional<YearEnum> year = yearEnumRepository.findReferenceByYear(yearValue);
-        Optional<GDP> gdp = gdpRepository
-            .findAllReferencesByYearYearAndCountryName(yearValue, countryName);
 
-        if (!country.isPresent()) throw new CountryNotFoundException(countryName);
-        if (!bean.isPresent()) throw new BeanNotFoundException(beanName);
-        if (!year.isPresent()) throw new YearNotFoundException(yearValue);
         if (!gdp.isPresent()) throw new GDPinBeanNotFoundException(countryName, yearValue);
+        if (!bean.isPresent()) throw new IllegalArgumentException("Bean not found: " + beanName);
 
-        GDPDto dto = GDPDto.toDto(gdp.get());
-        
+        BigDecimal beanValue = bean.get().getBeanPrice();
+
+        if (beanValue.compareTo(BigDecimal.ZERO) == 0) {
+            throw new ArithmeticException("Division by zero");
+        }
+
+        BigDecimal gdpAmount = gdp.get().getGdpAmount();
+
+        BigDecimal beanGDP = gdpAmount.divide(beanValue, 2, RoundingMode.HALF_UP);
+
+        BeanGDPDto dto = new BeanGDPDto(countryName, yearValue, beanGDP.setScale(2, RoundingMode.HALF_UP));
+
         return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
-    
     }
 
     @GetMapping("/gdpRatio/{countryName1}/{countryName2}/{beanName}/{year}")
