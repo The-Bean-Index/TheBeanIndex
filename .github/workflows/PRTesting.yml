@@ -43,8 +43,8 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
-      - name: Check maven version
-        run: mvn -v
+      - name: Run the Maven verify phase
+        run: mvn --batch-mode --update-snapshots verify
 
       - name: Restore Maven cache
         uses: skjolber/maven-cache-github-action@v1
@@ -61,9 +61,6 @@ jobs:
         run: |
           echo "DB_DATABASE=jdbc:sqlserver://$DB_HOST:$DB_PORT;authentication=sqlPassword;databaseName=thebeanindex;encrypt=true;trustServerCertificate=true" >> $GITHUB_ENV
           echo "DB_USER=$DB_USERNAME" >> $GITHUB_ENV
-
-      - name: Run Clean Install
-        run: mvn clean install
 
       - name: Run Tests
         run: mvn test
