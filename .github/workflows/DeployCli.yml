@@ -19,54 +19,54 @@ jobs:
       APP_NAME: bean-index-cli
     permissions:
       id-token: write
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@v4.1.1
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4.0.1
-        with:
-          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE }}
-          aws-region: ${{ vars.AWS_REGION }}
-
-      - name: Install Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '21'
-
-      - name: Get API URL
-        run: |
-          echo "API_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)" >> $env:GITHUB_ENV
-
-      - name: Write google credential file
-        run: echo "${{ secrets.GOOGLE_CLIENT }}" > .\src\main\resources\client_secret.json
-
-      - name: Replace API base URL
-        working-directory: .\beanIndex\src\main\resources
-        run: |
-          (Get-Content application.properties) -replace “http://localhost:8080”, "${{ env.API_IP }}"
-
-      - name: Set VERSION environment variable
-        run: |
-          pwd
-          $version=mvn help:evaluate -Dexpression='project.version' -q -DforceStdout
-          echo "VERSION=$version" >> $env:GITHUB_ENV
-
-      - name: Package application
-        run: |
-          mvn package -DskipTests
-          jpackage.exe --verbose `
-            --input ./target `
-            --main-jar $env:APP_NAME-$env:VERSION.jar `
-            --name $env:APP_NAME `
-            --dest build/distributions `
-            --vendor TheBeanIndex `
-            --win-console `
-            --win-dir-chooser `
-            --win-menu `
-            --win-shortcut `
-            --win-shortcut-prompt
+      #
+      #      - name: Configure AWS Credentials
+      #        uses: aws-actions/configure-aws-credentials@v4.0.1
+      #        with:
+      #          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE }}
+      #          aws-region: ${{ vars.AWS_REGION }}
+      #
+      #      - name: Install Java 21
+      #        uses: actions/setup-java@v4
+      #        with:
+      #          distribution: 'zulu'
+      #          java-version: '21'
+      #
+      #      - name: Get API URL
+      #        run: |
+      #          echo "API_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)" >> $env:GITHUB_ENV
+      #
+      #      - name: Write google credential file
+      #        run: echo "${{ secrets.GOOGLE_CLIENT }}" > .\src\main\resources\client_secret.json
+      #
+      #      - name: Replace API base URL
+      #        working-directory: .\beanIndex\src\main\resources
+      #        run: |
+      #          (Get-Content application.properties) -replace “http://localhost:8080”, "${{ env.API_IP }}"
+      #
+      #      - name: Set VERSION environment variable
+      #        run: |
+      #          pwd
+      #          $version=mvn help:evaluate -Dexpression='project.version' -q -DforceStdout
+      #          echo "VERSION=$version" >> $env:GITHUB_ENV
+      #
+      #      - name: Package application
+      #        run: |
+      #          mvn package -DskipTests
+      #          jpackage.exe --verbose `
+      #            --input ./target `
+      #            --main-jar $env:APP_NAME-$env:VERSION.jar `
+      #            --name $env:APP_NAME `
+      #            --dest build/distributions `
+      #            --vendor TheBeanIndex `
+      #            --win-console `
+      #            --win-dir-chooser `
+      #            --win-menu `
+      #            --win-shortcut `
+      #            --win-shortcut-prompt
 
       - name: Create Release
         uses: actions/create-release@v1.1.4
@@ -74,18 +74,18 @@ jobs:
         with:
           draft: false
           prerelease: false
-          release_name: $env:VERSION
-          tag_name: Release-$env:VERSION
+          release_name: debug
+          tag_name: Release-debug
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Upload windows artifact
-        uses: actions/upload-release-asset@latest
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/distribution/$env:APP_NAME-$env:VERSION.exe
-          asset_name: $env:APP_NAME-$env:VERSION.exe
-          asset_content_type: application/vnd.microsoft.portable-executable
-      
+#      - name: Upload windows artifact
+#        uses: actions/upload-release-asset@latest
+#        env:
+#          GITHUB_TOKEN: ${{ github.token }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ./build/distribution/$env:APP_NAME-$env:VERSION.exe
+#          asset_name: $env:APP_NAME-$env:VERSION.exe
+#          asset_content_type: application/vnd.microsoft.portable-executable
+#      
