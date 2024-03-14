@@ -43,16 +43,13 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
-      - name: Update Maven
-        run: apt-get --only-upgrade install maven -y
-
-      - name: Get Maven version
-        run: mvn -v
+      - name: Run the Maven verify phase
+        run: mvn --batch-mode --update-snapshots verify
       
       - name: Restore Maven cache
         uses: skjolber/maven-cache-github-action@v1
         with:
-          step: restore
+          step: restore -U
 
       - name: Get secrets
         uses: aws-actions/aws-secretsmanager-get-secrets@v2.0.1
