@@ -42,7 +42,9 @@ jobs:
           (Get-Content application.properties) -replace “http://localhost:8080”, "${{ env.API_IP }}"
 
       - name: Set VERSION environment variable
+        working-directory: .
         run: |
+          pwd
           $version=mvn help:evaluate -Dexpression='project.version' -q -DforceStdout
           echo "VERSION=$version" >> $env:GITHUB_ENV
 
