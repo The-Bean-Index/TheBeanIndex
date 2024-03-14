@@ -1,6 +1,6 @@
-package com.example.beanIndex;
+package com.bbdgrad.beanIndex;
 
-import com.example.beanIndex.models.AuthRecord;
+import com.bbdgrad.beanIndex.models.AuthRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -105,7 +105,7 @@ public class CliCommands extends SecuredCommand {
 
     @ShellMethod(key = "login", value = "Login via Google")
     public void login() throws GeneralSecurityException, IOException {
-        GoogleAuth auth = new GoogleAuth();
+        com.example.beanIndex.GoogleAuth auth = new com.example.beanIndex.GoogleAuth();
         AuthRecord authRecord = auth.signIn();
         authService.setAuth(authRecord);
         System.out.println("Logged in successfully");

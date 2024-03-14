@@ -1,4 +1,4 @@
-package com.example.beanIndex;
+package com.bbdgrad.beanIndex;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.Availability;
@@ -12,7 +12,7 @@ public abstract class SecuredCommand {
         if (authService.isIdTokenValid()) {
             return Availability.available();
         }
-        
+
         return Availability.unavailable("You are not logged in. Please log in using the 'login' command");
     }
 }

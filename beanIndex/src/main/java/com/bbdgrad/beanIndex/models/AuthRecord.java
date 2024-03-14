@@ -1,4 +1,4 @@
-package com.example.beanIndex.models;
+package com.bbdgrad.beanIndex.models;
 
 import java.util.Date;
 
