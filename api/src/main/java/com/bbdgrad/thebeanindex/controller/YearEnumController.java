@@ -71,8 +71,8 @@ public class YearEnumController {
         return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
     }
 
-    @GetMapping("country/{country}")
-    public ResponseEntity<YearsEnumDto> getCountryGdpForLast5Years(@PathVariable String country) {
+    @GetMapping("country/{country}/{beanName}")
+    public ResponseEntity<YearsEnumDto> getCountryGdpForLast5Years(@PathVariable String country, @PathVariable String beanName) {
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat("yyyy");
 
@@ -80,7 +80,7 @@ public class YearEnumController {
 
         List<YearEmunDto> dtos = IntStream.range(year - 5, year + 1)
             .mapToObj((y) -> {
-                YearEmunDto dto = getCountriesByYear(y, null).getBody();
+                YearEmunDto dto = getCountriesByYear(y, beanName).getBody();
                 dto.setYear(dto.getYear() == null ? y : dto.getYear());
 
                 return dto;
