@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class ApiClient {
@@ -54,7 +55,7 @@ public class ApiClient {
                 return countryNames != null ? countryNames : new ArrayList<>();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error occured please try again later: " + e.getMessage());
         }
 
         return new ArrayList<>();
@@ -73,13 +74,20 @@ public class ApiClient {
                 new ParameterizedTypeReference<Map<String, Object>>() {
                 });
 
-            if (responseEntity.getBody() != null) {
-                Map<String, Object> responseBody = responseEntity.getBody();
-                List<String> beanNames = (List<String>) responseBody.get("beanNames");
-                return beanNames != null ? beanNames : new ArrayList<>();
-            }
+                if (responseEntity.getBody() != null) {
+
+                    Map<String, Object> responseBody = responseEntity.getBody();
+                    Object beansObject = responseBody.get("beanNames");
+                    List<String> beanNames = ((List<?>) beansObject).stream()
+                            .map(String.class::cast)
+                            .collect(Collectors.toList());
+                    return beanNames;
+                } else {
+                    return new ArrayList<>();
+                }
+
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error occured please try again later: " + e.getMessage());
         }
 
         return new ArrayList<>();
@@ -100,11 +108,12 @@ public class ApiClient {
 
             if (responseEntity.getBody() != null) {
                 Map<String, Object> responseBody = responseEntity.getBody();
+                 
                 List<Integer> years = (List<Integer>) responseBody.get("years");
                 return years != null ? years : new ArrayList<>();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error occured please try again later: " + e.getMessage());
         }
 
         return new ArrayList<>();
@@ -114,7 +123,7 @@ public class ApiClient {
     //Get GDP of a country for a specific year in terms of beans
     public Double getGDPForCountryInTermsOfBeans(String country, String beanType, int year) {
         String url = baseUrl + "/beans/gdpOfCountryInTermsOfBeans/" + country + "/" + beanType + "/" + year;
-        System.out.println(beanType);
+        
         try {
             ResponseEntity<Map<String, Object>> responseEntity = restTemplate.exchange(
                 url,
@@ -124,18 +133,17 @@ public class ApiClient {
                 });
 
             if (responseEntity.getBody() != null && responseEntity.getBody().containsKey("gdpAmount")) {
-                Double gdpAmount = (Double) responseEntity.getBody().get("gdpAmount");
+                Double gdpAmount =  (Double)responseEntity.getBody().get("gdpAmount");
                 return gdpAmount;
             } else {
                 System.out.println("No response received from the server or gdpAmount not found.");
                 return null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error occured please try again later: " + e.getMessage());
             return null;
         }
     }
-
 
     //Compare GDP of countries in terms of beans
     public Double getGDPRatioForCountries(String country1, String country2, String beanType, int year) {
@@ -157,8 +165,9 @@ public class ApiClient {
                 return null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error occured please try again later: " + e.getMessage());
             return null;
         }
+        
     }
 }
