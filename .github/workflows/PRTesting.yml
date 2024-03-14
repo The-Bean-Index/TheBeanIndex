@@ -61,7 +61,7 @@ jobs:
           echo "DB_USER=$DB_USERNAME" >> $GITHUB_ENV
 
       - name: Run Tests
-        run: mvn test
+        run: mvn test -X
 
       - name: Build Image
         run: mvn spring-boot:build-image -Dmaven.test.skip
