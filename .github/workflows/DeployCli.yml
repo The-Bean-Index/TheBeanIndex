@@ -34,7 +34,7 @@ jobs:
           echo "API_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)" >> $GITHUB_ENV
 
       - name: Write google credential file
-        run: ${{ secrets.GOOGLE_CLIENT }} > ./src/main/resources/client_secret.json
+        run: echo "${{ secrets.GOOGLE_CLIENT }}" > ./src/main/resources/client_secret.json
 
       - name: Replace API base URL
         working-directory: ./src/main/resources
@@ -43,7 +43,7 @@ jobs:
 
       - name: Set VERSION environment variable
         run: |
-          echo "VERSION=$(mvn help:evaluate -Dexpression='project.version' -q -DforceStdout)" >> $GITHUB_ENV
+          echo "VERSION=$(mvn help:evaluate -Dexpression='project.version' -q -DforceStdout)" >> $env:GITHUB_ENV
 
       - name: Package application
         run: |
