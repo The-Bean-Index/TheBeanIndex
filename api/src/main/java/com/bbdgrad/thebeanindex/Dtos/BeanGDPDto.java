@@ -9,12 +9,12 @@ public class BeanGDPDto {
 
     private String country;
     private int year;
-    private BigDecimal convertedGDP;
+    private BigDecimal gdpAmount;
 
-    public BeanGDPDto(String country, int year, BigDecimal convertedGDP) {
+    public BeanGDPDto(String country, int year, BigDecimal gdpAmount) {
         this.country = country;
         this.year = year;
-        this.convertedGDP = convertedGDP;
+        this.gdpAmount = gdpAmount;
     }
 
 }
