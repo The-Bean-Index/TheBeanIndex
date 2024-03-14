@@ -14,6 +14,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class AccessTokenFilter extends GenericFilterBean {
     private final boolean authenticationEnabled;
+    private final String CLIENT_ID;
 
 
     @Override
@@ -23,7 +24,7 @@ public class AccessTokenFilter extends GenericFilterBean {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         String authHeader = request.getHeader("Authorization");
-        GoogleTokenValidator tokenValidator = new GoogleTokenValidator();
+        GoogleTokenValidator tokenValidator = new GoogleTokenValidator(CLIENT_ID);
         if (authenticationEnabled && (authHeader == null || !tokenValidator.isTokenValid(authHeader))) {
             response.setStatus(
                 HttpServletResponse.SC_UNAUTHORIZED);

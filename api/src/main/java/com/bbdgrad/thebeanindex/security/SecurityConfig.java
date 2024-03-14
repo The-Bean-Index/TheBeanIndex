@@ -16,14 +16,17 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 public class SecurityConfig {
     @Value("${authentication.enabled:true}")
     private boolean authenticationEnabled;
- 
+
+    @Value("${google.client.id}")
+    private String googleClientId;
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().permitAll())
-            .addFilterBefore(new AccessTokenFilter(authenticationEnabled), BasicAuthenticationFilter.class)
+            .addFilterBefore(new AccessTokenFilter(authenticationEnabled, googleClientId), BasicAuthenticationFilter.class)
             .build();
     }
 }
