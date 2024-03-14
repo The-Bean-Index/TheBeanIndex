@@ -31,13 +31,13 @@ jobs:
 
       - name: Get API URL
         run: |
-          echo "API_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)" >> $GITHUB_ENV
+          echo "API_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)" >> $env:GITHUB_ENV
 
       - name: Write google credential file
         run: echo "${{ secrets.GOOGLE_CLIENT }}" > ./src/main/resources/client_secret.json
 
       - name: Replace API base URL
-        working-directory: ./src/main/resources
+        working-directory: \beanIndex\src\main\resources
         run: |
           (Get-Content application.properties) -replace “http://localhost:8080”, "${{ env.API_IP }}"
 
@@ -50,7 +50,7 @@ jobs:
           mvn package -DskipTests
           jpackage --verbose `
             --input ./target `
-            --main-jar $APP_NAME-$VERSION.jar `
+            --main-jar $env:APP_NAME-$env:VERSION.jar `
             --name $APP_NAME `
             --dest build/distributions `
             --vendor TheBeanIndex `
@@ -66,8 +66,8 @@ jobs:
         with:
           draft: false
           prerelease: false
-          release_name: $VERSION
-          tag_name: Release-$VERSION
+          release_name: $env:VERSION
+          tag_name: Release-$env:VERSION
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
