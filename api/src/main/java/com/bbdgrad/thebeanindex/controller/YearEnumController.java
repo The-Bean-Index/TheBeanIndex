@@ -71,7 +71,7 @@ public class YearEnumController {
 
         int year = Integer.parseInt(format.format(date));
 
-        List<YearEmunDto> dtos = IntStream.range(year - 5, year + 1)
+        List<YearEmunDto> dtos = IntStream.range(year - 4, year + 1)
             .mapToObj((y) -> {
                 YearEmunDto dto = getCountriesByYear(y, beanName).getBody();
                 dto.setYear(dto.getYear() == null ? y : dto.getYear());
