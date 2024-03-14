@@ -47,7 +47,7 @@ jobs:
       #   uses: stCarolas/setup-maven@v5
       #   with:
       #     maven-version: 3.9.6
-      - run: mvn --batch-mode --update-snapshots verify
+      - run: mvn -B package --file pom.xml
       
       - name: Get secrets
         uses: aws-actions/aws-secretsmanager-get-secrets@v2.0.1
