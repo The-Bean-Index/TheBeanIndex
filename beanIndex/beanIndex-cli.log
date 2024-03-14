@@ -1,8 +1,0 @@
-1710447878938:help
-1710447882534:login
-1710447900771:list countries
-1710447903717:list years
-1710447906465:list beans
-1710447948068:gdp compar -c Japan -b Soybeans -y 2023
-1710447952241:gdp compare -c Japan -b Soybeans -y 2023
-1710447973462:gdp in beans -c Japan -b Soybeans -y 2023
