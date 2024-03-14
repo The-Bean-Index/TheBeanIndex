@@ -59,6 +59,9 @@ jobs:
           echo "DB_DATABASE=jdbc:sqlserver://$DB_HOST:$DB_PORT;authentication=sqlPassword;databaseName=thebeanindex;encrypt=true;trustServerCertificate=true" >> $GITHUB_ENV
           echo "DB_USER=$DB_USERNAME" >> $GITHUB_ENV
 
+      - name: Run Clean Install
+        run: mvn clean install
+
       - name: Run Tests
         run: mvn test
 
