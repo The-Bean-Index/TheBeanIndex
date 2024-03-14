@@ -43,8 +43,10 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
-      - name: Run the Maven verify phase
-        run: mvn --batch-mode --update-snapshots verify
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.9.6
       
       - name: Restore Maven cache
         uses: skjolber/maven-cache-github-action@v1
