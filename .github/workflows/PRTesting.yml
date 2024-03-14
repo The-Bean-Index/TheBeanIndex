@@ -23,6 +23,8 @@ jobs:
         shell: bash
         working-directory: ./api
     runs-on: ubuntu-latest
+    env:
+      ENABLE_AUTHENTICATION: false
     permissions:
       id-token: write
       contents: read
@@ -80,7 +82,7 @@ jobs:
 
       - name: Run Container and Integration tests
         run: |
-          docker run -p 8080:8080 -e DB_DATABASE=$DB_DATABASE  -e DB_USER=$DB_USER  -e DB_PASSWORD=$DB_PASSWORD -m=750M -d the-bean-index:$VERSION
+          docker run -p 8080:8080 -e DB_DATABASE=$DB_DATABASE  -e DB_USER=$DB_USER  -e DB_PASSWORD=$DB_PASSWORD -e ENABLE_AUTHENTICATION=$ENABLE_AUTHENTICATION -m=750M -d the-bean-index:$VERSION
           sleep 10
           postman collection run "29385230-7b98d6e8-d977-4f0e-87fb-b0f8a52ae506"
 

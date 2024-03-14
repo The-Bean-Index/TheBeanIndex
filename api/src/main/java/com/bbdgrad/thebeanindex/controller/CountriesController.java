@@ -32,7 +32,7 @@ public class CountriesController {
         List<Countries> countries = countriesRepository.findAll();
         List<CountriesDto> countriesDtoList = countries.stream().map(CountriesDto::toDto).collect(Collectors.toList());
         return new CountriesResponseDto(countriesDtoList);
-    }
+    } 
 
     @GetMapping("/names")
     public ResponseEntity<CountryNamesDto> getAllCountryNames() {
