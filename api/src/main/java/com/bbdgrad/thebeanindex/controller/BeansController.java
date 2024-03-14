@@ -16,16 +16,10 @@ import com.bbdgrad.thebeanindex.Dtos.BeanGDPDto;
 import com.bbdgrad.thebeanindex.Dtos.BeanNamesDto;
 import com.bbdgrad.thebeanindex.Dtos.BeansDto;
 import com.bbdgrad.thebeanindex.Dtos.BeansResponseDto;
-import com.bbdgrad.thebeanindex.Dtos.GDPDto;
 import com.bbdgrad.thebeanindex.Dtos.GDPRatioDto;
-import com.bbdgrad.thebeanindex.exception.BeanNotFoundException;
-import com.bbdgrad.thebeanindex.exception.CountryNotFoundException;
 import com.bbdgrad.thebeanindex.exception.GDPinBeanNotFoundException;
-import com.bbdgrad.thebeanindex.exception.YearNotFoundException;
 import com.bbdgrad.thebeanindex.model.Beans;
-import com.bbdgrad.thebeanindex.model.Countries;
 import com.bbdgrad.thebeanindex.model.GDP;
-import com.bbdgrad.thebeanindex.model.YearEnum;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
