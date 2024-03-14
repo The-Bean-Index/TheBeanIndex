@@ -1,6 +1,6 @@
-package com.example.beanIndex;
+package com.bbdgrad.beanIndex;
 
-import com.example.beanIndex.models.AuthRecord;
+import com.bbdgrad.beanIndex.models.AuthRecord;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
