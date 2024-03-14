@@ -43,17 +43,11 @@ public class YearEnumController {
         Optional<YearEnum> response = yearEnum.findAllReferencesByYear(year);
         Optional<Beans> bean = beansRepository.findReferenceByName(beanName);
 
-        if (response.isEmpty()) {
-            return new ResponseEntity<>(new YearEmunDto(), HttpStatus.NOT_FOUND);
-        } 
-
-        if (!bean.isPresent()) throw new IllegalArgumentException("Bean not found: " + beanName);
-
         BigDecimal beanValue = bean.get().getBeanPrice();
 
-        if (beanValue.compareTo(BigDecimal.ZERO) == 0) {
-            throw new ArithmeticException("Division by zero");
-        }
+        if (response.isEmpty() || !bean.isPresent() || beanValue.compareTo(BigDecimal.ZERO) == 0) {
+            return new ResponseEntity<>(new YearEmunDto(), HttpStatus.NOT_FOUND);
+        } 
 
         List<GDP> gdps = response.get().getGdps().stream()
             .map((gdp) -> {
