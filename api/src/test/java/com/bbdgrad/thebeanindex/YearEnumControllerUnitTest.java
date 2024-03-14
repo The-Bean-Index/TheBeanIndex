@@ -25,7 +25,9 @@ import com.bbdgrad.thebeanindex.Dtos.YearEnumAllowedYearsDto;
 import com.bbdgrad.thebeanindex.Dtos.YearsEnumDto;
 import com.bbdgrad.thebeanindex.model.YearEnum;
 import com.bbdgrad.thebeanindex.repository.YearEnumRepository;
-@SpringBootTest
+
+
+@SpringBootTest(classes = { ThebeanindexApplication.class })
 public class YearEnumControllerUnitTest {
 
     @Autowired

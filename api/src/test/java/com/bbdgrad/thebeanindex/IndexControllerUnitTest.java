@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.bbdgrad.thebeanindex.controller.IndexController;
 
-@SpringBootTest
+@SpringBootTest(classes = { ThebeanindexApplication.class })
 public class IndexControllerUnitTest {
 
     @Autowired

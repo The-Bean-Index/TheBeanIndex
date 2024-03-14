@@ -1,5 +1,6 @@
 package com.bbdgrad.thebeanindex.controller;
 
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;

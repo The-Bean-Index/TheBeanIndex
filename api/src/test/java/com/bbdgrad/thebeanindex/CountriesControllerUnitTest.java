@@ -19,7 +19,7 @@ import com.bbdgrad.thebeanindex.Dtos.CountriesResponseDto;
 import com.bbdgrad.thebeanindex.model.Countries;
 import com.bbdgrad.thebeanindex.repository.CountriesRepository;
 
-@SpringBootTest
+@SpringBootTest(classes = { ThebeanindexApplication.class })
 public class CountriesControllerUnitTest {
 
     @Mock

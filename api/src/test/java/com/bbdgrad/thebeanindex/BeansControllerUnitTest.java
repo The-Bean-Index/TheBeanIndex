@@ -31,7 +31,7 @@ import com.bbdgrad.thebeanindex.repository.YearEnumRepository;
 
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = BeansController.class)
+@SpringBootTest(classes = { ThebeanindexApplication.class })
 public class BeansControllerUnitTest {
 
   @Autowired
