@@ -48,11 +48,6 @@ jobs:
         with:
           maven-version: 3.9.6
       
-      - name: Restore Maven cache
-        uses: skjolber/maven-cache-github-action@v1
-        with:
-          step: restore -U
-
       - name: Get secrets
         uses: aws-actions/aws-secretsmanager-get-secrets@v2.0.1
         with:
