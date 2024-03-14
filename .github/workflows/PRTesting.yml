@@ -43,11 +43,10 @@ jobs:
           distribution: 'adopt'
           java-version: '21'
 
-      # - name: Set up Maven
-      #   uses: stCarolas/setup-maven@v5
-      #   with:
-      #     maven-version: 3.9.6
-      - run: mvn -B package --file pom.xml
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.9.6
       
       - name: Get secrets
         uses: aws-actions/aws-secretsmanager-get-secrets@v2.0.1
