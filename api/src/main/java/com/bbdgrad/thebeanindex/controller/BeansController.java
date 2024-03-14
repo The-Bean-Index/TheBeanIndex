@@ -70,7 +70,7 @@ public class BeansController {
     }
 
     @GetMapping("/gdpOfCountryInTermsOfBeans/{countryName}/{beanName}/{year}")
-    public ResponseEntity<BeanGDPDto> getGDPOfCountryInBeans( // ResponseEntity<GDPRatioDto>
+    public ResponseEntity<BeanGDPDto> getGDPOfCountryInBeans( 
             @PathVariable String countryName,
             @PathVariable String beanName,
             @PathVariable(name = "year") int yearValue

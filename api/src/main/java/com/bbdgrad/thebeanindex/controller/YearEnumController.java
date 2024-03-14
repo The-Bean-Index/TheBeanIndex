@@ -1,6 +1,9 @@
 package com.bbdgrad.thebeanindex.controller;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -15,11 +18,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bbdgrad.thebeanindex.Dtos.BeanGDPDto;
 import com.bbdgrad.thebeanindex.Dtos.YearEmunDto;
 import com.bbdgrad.thebeanindex.Dtos.YearsEnumDto;
 import com.bbdgrad.thebeanindex.Dtos.YearEnumAllowedYearsDto;
+import com.bbdgrad.thebeanindex.model.GDP;
+import com.bbdgrad.thebeanindex.model.Beans;
 import com.bbdgrad.thebeanindex.model.YearEnum;
 import com.bbdgrad.thebeanindex.repository.YearEnumRepository;
+import com.bbdgrad.thebeanindex.repository.BeansRepository;
 
 @RestController
 @RequestMapping("/year")
@@ -27,22 +34,40 @@ public class YearEnumController {
 
     @Autowired
     YearEnumRepository yearEnum;
-    
-    @GetMapping("/{year}")
-    public ResponseEntity<YearEmunDto> getCountriesByYear(@PathVariable int year) {
-        Optional<YearEnum> response = yearEnum.findAllReferencesByYear(year);
 
-        if (response.isEmpty()) {
+    @Autowired
+    BeansRepository beansRepository;
+    
+    @GetMapping("/{year}/{beanName}")
+    public ResponseEntity<YearEmunDto> getCountriesByYear(@PathVariable int year, @PathVariable String beanName) {
+        Optional<YearEnum> response = yearEnum.findAllReferencesByYear(year);
+        Optional<Beans> bean = beansRepository.findReferenceByName(beanName);
+
+        
+        if (response.isEmpty() || !bean.isPresent() || bean.get().getBeanPrice().compareTo(BigDecimal.ZERO) == 0) {
             return new ResponseEntity<>(new YearEmunDto(), HttpStatus.NOT_FOUND);
         } 
+
+        BigDecimal beanValue = bean.get().getBeanPrice();
+
+        List<GDP> gdps = response.get().getGdps().stream()
+            .map((gdp) -> {
+                gdp.setGdpAmount(gdp.getGdpAmount().divide(beanValue, 2, RoundingMode.HALF_UP));
+
+                return gdp;
+            })
+            .toList();
+        
+        response.get().setGdps(gdps);
+        
 
         YearEmunDto dto = YearEmunDto.toDto(response.get());
 
         return new ResponseEntity<>(dto, HttpStatus.ACCEPTED);
     }
 
-    @GetMapping("country/{country}")
-    public ResponseEntity<YearsEnumDto> getCountryGdpForLast5Years(@PathVariable String country) {
+    @GetMapping("country/{country}/{beanName}")
+    public ResponseEntity<YearsEnumDto> getCountryGdpForLast5Years(@PathVariable String country, @PathVariable String beanName) {
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat("yyyy");
 
@@ -50,7 +75,7 @@ public class YearEnumController {
 
         List<YearEmunDto> dtos = IntStream.range(year - 5, year + 1)
             .mapToObj((y) -> {
-                YearEmunDto dto = getCountriesByYear(y).getBody();
+                YearEmunDto dto = getCountriesByYear(y, beanName).getBody();
                 dto.setYear(dto.getYear() == null ? y : dto.getYear());
 
                 return dto;
