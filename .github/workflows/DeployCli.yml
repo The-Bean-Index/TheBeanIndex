@@ -37,7 +37,7 @@ jobs:
         run: echo "${{ secrets.GOOGLE_CLIENT }}" > ./src/main/resources/client_secret.json
 
       - name: Replace API base URL
-        working-directory: \beanIndex\src\main\resources
+        working-directory: .\beanIndex\src\main\resources
         run: |
           (Get-Content application.properties) -replace “http://localhost:8080”, "${{ env.API_IP }}"
 
