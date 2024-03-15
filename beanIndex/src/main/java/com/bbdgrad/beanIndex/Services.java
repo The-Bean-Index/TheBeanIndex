@@ -36,7 +36,6 @@ public class Services {
     public Double getGDPRatioForCountries(String country1, String country2, String beanType, int year) {
         return apiClient.getGDPRatioForCountries(country1, country2, beanType, year);
     }
-    
     public List<GDPData> getGDPReportForBean(String beanType, int year) {
         return apiClient.getGDPReportForBean(beanType, year);
     }

@@ -173,36 +173,36 @@ public class ApiClient {
         
     }
     public List<GDPData> getGDPReportForBean(String beanType, int year) {
-    String url = baseUrl + "/year/" + year + "/" + beanType;
+        String url = baseUrl + "/year/" + year + "/" + beanType;
 
-    try {
-        ResponseEntity<JsonNode> responseEntity = restTemplate.exchange(
-                url,
-                org.springframework.http.HttpMethod.GET,
-                createHeaders(),
-                JsonNode.class);
+        try {
+            ResponseEntity<JsonNode> responseEntity = restTemplate.exchange(
+                    url,
+                    org.springframework.http.HttpMethod.GET,
+                    createHeaders(),
+                    JsonNode.class);
 
-        List<GDPData> gdpDataList = new ArrayList<>();
+            List<GDPData> gdpDataList = new ArrayList<>();
 
-        if (responseEntity.getBody() != null) {
-            JsonNode responseBody = responseEntity.getBody();
-            JsonNode gdpsNode = responseBody.get("gdps");
+            if (responseEntity.getBody() != null) {
+                JsonNode responseBody = responseEntity.getBody();
+                JsonNode gdpsNode = responseBody.get("gdps");
 
-            if (gdpsNode != null && gdpsNode.isArray()) {
-                for (JsonNode gdpNode : gdpsNode) {
-                    String country = gdpNode.get("country").get("name").asText();
-                    Double gdpAmount = gdpNode.get("gdpAmount").asDouble();
-                    GDPData gdpData = new GDPData(country, gdpAmount);
-                    gdpDataList.add(gdpData);
+                if (gdpsNode != null && gdpsNode.isArray()) {
+                    for (JsonNode gdpNode : gdpsNode) {
+                        String country = gdpNode.get("country").get("name").asText();
+                        Double gdpAmount = gdpNode.get("gdpAmount").asDouble();
+                        GDPData gdpData = new GDPData(country, gdpAmount);
+                        gdpDataList.add(gdpData);
+                    }
                 }
             }
+
+            return gdpDataList;
+
+        } catch (Exception e) {
+            System.out.println("Error occurred. Please try again later: " + e.getMessage());
+            return new ArrayList<>();
         }
-
-        return gdpDataList;
-
-    } catch (Exception e) {
-        System.out.println("Error occurred. Please try again later: " + e.getMessage());
-        return new ArrayList<>();
     }
-}
 }
