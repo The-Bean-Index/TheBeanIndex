@@ -1,3 +1,5 @@
+name: Deploy CLI
+
 on:
   push:
     branches:
