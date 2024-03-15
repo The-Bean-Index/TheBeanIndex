@@ -112,6 +112,26 @@ public class CliCommands extends SecuredCommand {
         System.out.println(ratio);
     }
 
+    // 6. Get GDP report of all countries in terms of a specific bean type
+    @ShellMethod(key = "gdp report", value = "Get GDP report of all countries in terms of a specific bean type")
+    @ShellMethodAvailability("isUserSignedIn")
+    public void gdpReport(
+        @ShellOption(value = {"-b", "--bean"}, help = "Type of bean") String beanType,
+        @ShellOption(value = {"-y", "--year"}, help = "Year for GDP calculation") int year) {
+
+        List<GDPData> gdpData = services.getGDPReportForBean(beanType, year);
+
+        if (gdpData == null || gdpData.isEmpty()) {
+            System.out.println("GDP report for " + beanType + " and year " + year + " is not available.");
+            return;
+        }
+
+        System.out.println("GDP report for " + beanType + " in year " + year + ":");
+        for (int i = 0; i < gdpData.size(); i++) {
+            GDPData data = gdpData.get(i);
+            System.out.println((i + 1) + ". " + data.getCountry() + ": " + data.getGdpAmount() + " (tons) of " + beanType);
+        }
+    }
 
    @ShellMethod(key = "login", value = "Login via Google")
     public void login() throws GeneralSecurityException, IOException {
